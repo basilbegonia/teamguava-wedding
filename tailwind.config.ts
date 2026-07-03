@@ -9,10 +9,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        forest: "#4D573F",
-        terracotta: "#EE8139",
-        cream: "#FCF7ED",
-        mustard: "#F2B965",
+        cream: "#fcf7ed",
+        tan: "#c69c6d",
+        brown: "#714e39",
+        rust: "#bb542c",
+        blush: "#f19595",
+        terracotta: "#ee8139",
+        mustard: "#f1b964",
+        olive: "#d1be77",
+        forest: "#4d573f",
       },
       fontFamily: {
         serif: ["var(--font-fraunces)", "Georgia", "serif"],
