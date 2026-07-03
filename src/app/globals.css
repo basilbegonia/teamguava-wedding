@@ -9,8 +9,17 @@
 
 html {
   scroll-behavior: smooth;
-  /* push anchor targets below the sticky 64px header */
-  scroll-padding-top: 4rem;
+  /* Sections snap flush to the top. If the sticky <Header> is re-mounted,
+     set this back to 4rem so anchor targets and snap points clear it. */
+  scroll-padding-top: 0;
+  /* snap each top-level section into view; proximity keeps taller-than-viewport
+     sections scrollable without trapping the user */
+  scroll-snap-type: y proximity;
+}
+
+/* each section is a direct <div> child of <main> */
+main > div {
+  scroll-snap-align: start;
 }
 
 body {

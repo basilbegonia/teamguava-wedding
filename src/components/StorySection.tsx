@@ -92,7 +92,7 @@ export default function StorySection() {
           Tara,&nbsp;kain?
         </h2>
 
-        <div className="grid grid-cols-2 gap-x-2 gap-y-0">
+        <div className="grid grid-cols-2 items-start gap-x-2 gap-y-0">
 
           <div className="col-start-1 row-start-1 flex flex-col justify-center pb-4">
             <p className="font-sans text-sm leading-snug text-forest font-medium">
