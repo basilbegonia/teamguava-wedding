@@ -25,14 +25,6 @@ const photos = [
     position: 'col-start-2 row-start-2 justify-self-end mt-4',
     bottomPb: 'pb-7',
   },
-  {
-    id: 4,
-    src: '/assets/home-page/photo-4.png',
-    alt: 'Bea and Basil',
-    rotate: '-rotate-[4deg]',
-    position: 'col-start-1 row-start-3 justify-self-start -mt-4',
-    bottomPb: 'pb-7',
-  },
 ]
 
 function Polaroid({ photo }: { photo: (typeof photos)[number] }) {
@@ -108,10 +100,6 @@ export default function StorySection() {
           ))}
 
         </div>
-
-        <p className="font-serif text-2xl font-bold text-forest/25 text-center mt-20">
-          Tara, kasal?
-        </p>
 
       </div>
     </div>

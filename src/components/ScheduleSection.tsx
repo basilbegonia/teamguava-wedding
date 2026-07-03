@@ -5,7 +5,7 @@ function TimeBadge({ time }: { time: string }) {
     <div className="relative inline-flex items-center justify-center mb-3">
       <div
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden"
-        style={{ width: 140, height: 62 }}
+        style={{ width: 108, height: 46 }}
       >
         <Image
           src="/assets/mga-ganap/shape-5.png"
@@ -13,11 +13,11 @@ function TimeBadge({ time }: { time: string }) {
           fill
           className="object-cover"
           style={{ objectPosition: 'center 32%' }}
-          sizes="140px"
+          sizes="108px"
           aria-hidden
         />
       </div>
-      <span className="relative z-10 font-sans text-sm font-bold text-white px-6 py-2">
+      <span className="relative z-10 font-sans text-sm font-bold text-white px-4 py-1.5">
         {time}
       </span>
     </div>
@@ -54,9 +54,9 @@ export default function ScheduleSection() {
         <div className="flex items-start gap-2 mb-4">
 
           {/* Blob decoration + portrait oval photo */}
-          <div className="relative flex-shrink-0 w-[148px] h-[210px]">
+          <div className="relative flex-shrink-0 w-[162px] h-[228px]">
             {/* Olive blob — bleeds off left edge */}
-            <div className="absolute -left-6 -top-2 w-[170px] h-[230px] pointer-events-none">
+            <div className="absolute -left-6 -top-2 w-[188px] h-[252px] pointer-events-none">
               <Image
                 src="/assets/mga-ganap/shape-3.png"
                 alt=""
@@ -69,8 +69,8 @@ export default function ScheduleSection() {
             <div
               className="absolute overflow-hidden shadow-md"
               style={{
-                width: 112,
-                height: 158,
+                width: 138,
+                height: 194,
                 borderRadius: '50%',
                 top: '50%',
                 left: '50%',
@@ -82,7 +82,7 @@ export default function ScheduleSection() {
                 alt="St. John Bosco Parish"
                 fill
                 className="object-cover object-center"
-                sizes="112px"
+                sizes="138px"
               />
             </div>
           </div>
@@ -135,9 +135,9 @@ export default function ScheduleSection() {
           </div>
 
           {/* Squiggle decoration + landscape oval photo */}
-          <div className="relative flex-shrink-0 w-[138px] h-[130px]">
+          <div className="relative flex-shrink-0 w-[158px] h-[150px]">
             {/* Orange squiggle — bleeds off right edge */}
-            <div className="absolute -right-6 -top-4 w-[160px] h-[160px] pointer-events-none">
+            <div className="absolute -right-6 -top-4 w-[186px] h-[186px] pointer-events-none">
               <Image
                 src="/assets/mga-ganap/shape-4.png"
                 alt=""
@@ -150,8 +150,8 @@ export default function ScheduleSection() {
             <div
               className="absolute overflow-hidden shadow-md"
               style={{
-                width: 128,
-                height: 96,
+                width: 152,
+                height: 114,
                 borderRadius: '50%',
                 top: '50%',
                 left: '50%',
@@ -163,7 +163,7 @@ export default function ScheduleSection() {
                 alt="The Mess Hall"
                 fill
                 className="object-cover object-center"
-                sizes="128px"
+                sizes="152px"
               />
             </div>
           </div>

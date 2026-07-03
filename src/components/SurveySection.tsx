@@ -110,7 +110,9 @@ export default function SurveySection() {
         id="survey"
         className="bg-cream text-forest py-20 px-5 min-h-[80svh] flex flex-col items-center justify-center text-center gap-6"
       >
-        <h2 className="font-serif text-4xl font-bold">Thanks for RSVP-ing!</h2>
+        <h2 className="font-serif text-4xl font-bold">
+          Thanks for <span className="whitespace-nowrap">RSVP-ing!</span>
+        </h2>
         <p className="font-serif text-2xl font-bold text-terracotta leading-snug">
           Please help us make<br />our day extra special.
         </p>

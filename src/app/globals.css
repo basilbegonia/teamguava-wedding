@@ -8,7 +8,11 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* NOTE: no `scroll-behavior: smooth` here — on touch devices it stacks a
+     fixed-duration animation on top of the native momentum snap, which reads
+     as clunky. Leaving it off lets the browser use its momentum-aware snap
+     easing (the smooth Instagram-style glide). */
+
   /* Sections snap flush to the top. If the sticky <Header> is re-mounted,
      set this back to 4rem so anchor targets and snap points clear it. */
   scroll-padding-top: 0;
@@ -20,6 +24,17 @@ html {
 /* each section is a direct <div> child of <main> */
 main > div {
   scroll-snap-align: start;
+  /* don't force a hard stop on every section — lets a firm flick glide past
+     several sections with momentum instead of catching on each one */
+  scroll-snap-stop: normal;
+}
+
+/* Respect users who ask for less motion: turn snapping off entirely so the
+   page scrolls freely without any pull. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-snap-type: none;
+  }
 }
 
 body {
