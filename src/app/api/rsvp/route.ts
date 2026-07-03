@@ -8,6 +8,7 @@ interface SubmissionEntry {
   dietary: string
   allergies: string
   transport: string
+  transport_home: string
 }
 
 export async function POST(req: NextRequest) {
@@ -56,13 +57,14 @@ export async function POST(req: NextRequest) {
   const now = new Date().toISOString()
 
   const rsvps: RSVPData[] = submissions.map((s) => ({
-    guest_token: s.guest_token,
-    name: guestMap.get(s.guest_token)!.name,
-    attendance: s.attendance,
-    dietary: s.dietary?.trim() ?? '',
-    allergies: s.allergies?.trim() ?? '',
-    transport: s.transport?.trim() ?? '',
-    submitted_at: now,
+    guest_token:    s.guest_token,
+    name:           guestMap.get(s.guest_token)!.name,
+    attendance:     s.attendance,
+    dietary:        s.dietary?.trim() ?? '',
+    allergies:      s.allergies?.trim() ?? '',
+    transport:      s.transport?.trim() ?? '',
+    transport_home: s.transport_home?.trim() ?? '',
+    submitted_at:   now,
   }))
 
   // 6. Write to Sheets

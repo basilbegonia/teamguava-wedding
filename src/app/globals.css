@@ -7,6 +7,12 @@
   --foreground: #2D4A2D;
 }
 
+html {
+  scroll-behavior: smooth;
+  /* push anchor targets below the sticky 64px header */
+  scroll-padding-top: 4rem;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);

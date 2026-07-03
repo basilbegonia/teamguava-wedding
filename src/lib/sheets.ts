@@ -10,7 +10,7 @@ const RSVPS_RANGE = 'RSVPs!A:G'
 const G = { name: 0, email: 1, token: 2, visited_at: 3, rsvp_submitted_at: 4, party_id: 5 }
 
 // Column indices — RSVPs tab
-// A=guest_token, B=name, C=attendance, D=dietary, E=allergies, F=transport, G=submitted_at
+// A=guest_token, B=name, C=attendance, D=dietary, E=allergies, F=transport, G=transport_home, H=submitted_at
 const R = {
   guest_token: 0,
   name: 1,
@@ -18,7 +18,8 @@ const R = {
   dietary: 3,
   allergies: 4,
   transport: 5,
-  submitted_at: 6,
+  transport_home: 6,
+  submitted_at: 7,
 }
 
 export interface Guest {
@@ -38,6 +39,7 @@ export interface RSVPData {
   dietary: string
   allergies: string
   transport: string
+  transport_home: string
   submitted_at: string
 }
 
@@ -174,6 +176,7 @@ export async function appendRSVP(data: RSVPData): Promise<void> {
         data.dietary,
         data.allergies,
         data.transport,
+        data.transport_home,
         data.submitted_at,
       ]],
     },
@@ -203,7 +206,7 @@ export async function updateRSVP(
   const sheetRowNumber = rowIndex + 1 // 1-based
   await sheets.spreadsheets.values.update({
     spreadsheetId: SPREADSHEET_ID,
-    range: `RSVPs!A${sheetRowNumber}:G${sheetRowNumber}`,
+    range: `RSVPs!A${sheetRowNumber}:H${sheetRowNumber}`,
     valueInputOption: 'RAW',
     requestBody: {
       values: [[
@@ -213,6 +216,7 @@ export async function updateRSVP(
         data.dietary,
         data.allergies,
         data.transport,
+        data.transport_home,
         data.submitted_at,
       ]],
     },
@@ -257,7 +261,7 @@ export async function submitPartyRSVPs(rsvps: RSVPData[]): Promise<void> {
       requestBody: {
         valueInputOption: 'RAW',
         data: toUpdate.map(({ rowNumber, data }) => ({
-          range: `RSVPs!A${rowNumber}:G${rowNumber}`,
+          range: `RSVPs!A${rowNumber}:H${rowNumber}`,
           values: [[
             data.guest_token,
             data.name,
@@ -265,6 +269,7 @@ export async function submitPartyRSVPs(rsvps: RSVPData[]): Promise<void> {
             data.dietary,
             data.allergies,
             data.transport,
+            data.transport_home,
             data.submitted_at,
           ]],
         })),
@@ -287,6 +292,7 @@ export async function submitPartyRSVPs(rsvps: RSVPData[]): Promise<void> {
           data.dietary,
           data.allergies,
           data.transport,
+          data.transport_home,
           data.submitted_at,
         ]),
       },
@@ -314,8 +320,36 @@ export async function getRSVP(token: string): Promise<RSVPData | null> {
     dietary: row[R.dietary] ?? '',
     allergies: row[R.allergies] ?? '',
     transport: row[R.transport] ?? '',
+    transport_home: row[R.transport_home] ?? '',
     submitted_at: row[R.submitted_at] ?? '',
   }
+}
+
+const SURVEY_RANGE = 'Survey!A:E'
+// A=timestamp, B=guest_token, C=guest_name, D=step, E=response
+
+export async function submitSurveyResponse(entry: {
+  guest_token: string
+  guest_name: string
+  step: string
+  response: string
+}): Promise<void> {
+  const sheets = getSheetsClient()
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SPREADSHEET_ID,
+    range: SURVEY_RANGE,
+    valueInputOption: 'RAW',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: {
+      values: [[
+        new Date().toISOString(),
+        entry.guest_token,
+        entry.guest_name,
+        entry.step,
+        entry.response,
+      ]],
+    },
+  })
 }
 
 /**
@@ -344,6 +378,7 @@ export async function getPartyRSVPs(tokens: string[]): Promise<(RSVPData | null)
         dietary: row[R.dietary] ?? '',
         allergies: row[R.allergies] ?? '',
         transport: row[R.transport] ?? '',
+        transport_home: row[R.transport_home] ?? '',
         submitted_at: row[R.submitted_at] ?? '',
       })
     }

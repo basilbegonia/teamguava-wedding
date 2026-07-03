@@ -10,7 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         forest: "#4D573F",
-        terracotta: "#EE1839",
+        terracotta: "#EE8139",
         cream: "#FCF7ED",
         mustard: "#F2B965",
       },

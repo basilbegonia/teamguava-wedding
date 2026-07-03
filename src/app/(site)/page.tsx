@@ -1,38 +1,44 @@
-'use client'
+import { cookies } from 'next/headers'
+import { jwtVerify } from 'jose'
+import { getParty, getPartyRSVPs, type Guest, type RSVPData } from '@/lib/sheets'
+import HeroSection from '@/components/HeroSection'
+import StorySection from '@/components/StorySection'
+import ScheduleSection from '@/components/ScheduleSection'
+import RSVPForm from '@/components/RSVPForm'
+import SurveySection from '@/components/SurveySection'
+import DressCodeSection from '@/components/DressCodeSection'
 
-import { useEffect, useState } from 'react'
+export const dynamic = 'force-dynamic'
 
-const COLOR_CYCLE = [
-  ['text-mustard', 'text-terracotta', 'text-cream'],
-  ['text-cream', 'text-mustard', 'text-terracotta'],
-  ['text-terracotta', 'text-cream', 'text-mustard'],
-]
+export default async function SpaPage() {
+  // Fetch party + existing RSVPs for the current guest so the RSVP section
+  // can be pre-filled. Middleware already guarantees a valid session exists.
+  let party: Guest[] = []
+  let existingRsvps: (RSVPData | null)[] = []
 
-export default function HeroPage() {
-  const [frame, setFrame] = useState(0)
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setFrame((f) => (f + 1) % COLOR_CYCLE.length)
-    }, 650)
-    return () => clearInterval(id)
-  }, [])
-
-  const [c0, c1, c2] = COLOR_CYCLE[frame]
+  try {
+    const sessionCookie = cookies().get('guava_session')?.value
+    if (sessionCookie) {
+      const { payload } = await jwtVerify(
+        sessionCookie,
+        new TextEncoder().encode(process.env.SESSION_SECRET!)
+      )
+      const guestToken = (payload as { token: string }).token
+      party = await getParty(guestToken)
+      existingRsvps = await getPartyRSVPs(party.map((g) => g.token))
+    }
+  } catch {
+    // Middleware handles invalid sessions; degrade gracefully here
+  }
 
   return (
-    <main className="flex-1 bg-forest flex flex-col items-center justify-center px-8 pb-16">
-      <div className="flex flex-col gap-1 text-center md:text-left">
-        <p className={`font-serif text-4xl md:text-6xl font-bold transition-colors duration-200 ${c0}`}>
-          dis is it, pancit!
-        </p>
-        <p className={`font-serif text-4xl md:text-6xl font-bold transition-colors duration-200 ${c1}`}>
-          dis is it, pancit!
-        </p>
-        <p className={`font-serif text-4xl md:text-6xl font-bold transition-colors duration-200 ${c2}`}>
-          dis is it, pancit!
-        </p>
-      </div>
-    </main>
+    <>
+      <HeroSection />
+      <StorySection />
+      <ScheduleSection />
+      <RSVPForm party={party} existingRsvps={existingRsvps} />
+      <SurveySection />
+      <DressCodeSection />
+    </>
   )
 }

@@ -1,21 +1,38 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/story', label: 'Our Story' },
-  { href: '/schedule', label: 'Mga Ganap' },
-  { href: '/rsvp', label: 'RSVP' },
-  { href: '/dress-code', label: 'Dress Code' },
+const NAV_LINKS = [
+  { href: '#home',       label: 'Home' },
+  { href: '#story',      label: 'Our Story' },
+  { href: '#schedule',   label: 'Mga Ganap' },
+  { href: '#rsvp',       label: 'RSVP' },
+  { href: '#dress-code', label: 'Dress Code' },
 ]
+
+const SECTION_IDS = NAV_LINKS.map((l) => l.href.slice(1))
 
 export default function Header() {
   const [open, setOpen] = useState(false)
-  const pathname = usePathname()
-  const isHero = pathname === '/'
+  const [activeSection, setActiveSection] = useState('home')
+
+  // Scroll-spy: mark whichever section's top has passed the header
+  useEffect(() => {
+    function update() {
+      const scrollY = window.scrollY + 72 // 64px header + 8px buffer
+      let current = SECTION_IDS[0]
+      for (const id of SECTION_IDS) {
+        const el = document.getElementById(id)
+        if (el && el.offsetTop <= scrollY) current = id
+      }
+      setActiveSection(current)
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [])
+
+  const isHero = activeSection === 'home'
 
   return (
     <header
@@ -26,24 +43,25 @@ export default function Header() {
       }`}
     >
       <div className="max-w-2xl mx-auto px-5 h-16 flex items-center justify-between">
-        <Link
-          href="/"
+        {/* Wordmark — scrolls to top */}
+        <a
+          href="#home"
+          onClick={() => setOpen(false)}
           className={`font-serif text-lg leading-none transition-colors ${
             isHero ? 'text-cream' : 'text-forest'
           }`}
-          onClick={() => setOpen(false)}
         >
           bea &amp; basil &apos;26
-        </Link>
+        </a>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-7">
-          {navLinks.map((link) => (
-            <Link
+          {NAV_LINKS.map((link) => (
+            <a
               key={link.href}
               href={link.href}
               className={`font-sans text-sm transition-colors ${
-                pathname === link.href
+                activeSection === link.href.slice(1)
                   ? isHero
                     ? 'text-mustard font-medium'
                     : 'text-terracotta font-medium'
@@ -53,7 +71,7 @@ export default function Header() {
               }`}
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
@@ -69,13 +87,9 @@ export default function Header() {
               key={bar}
               className={`block w-6 h-0.5 origin-center transition-all duration-200 ${
                 isHero ? 'bg-cream' : 'bg-forest'
-              } ${
-                bar === 0 && open ? 'rotate-45 translate-y-[7px]' : ''
-              } ${
+              } ${bar === 0 && open ? 'rotate-45 translate-y-[7px]' : ''} ${
                 bar === 1 && open ? 'opacity-0' : ''
-              } ${
-                bar === 2 && open ? '-rotate-45 -translate-y-[7px]' : ''
-              }`}
+              } ${bar === 2 && open ? '-rotate-45 -translate-y-[7px]' : ''}`}
             />
           ))}
         </button>
@@ -85,17 +99,16 @@ export default function Header() {
       {open && (
         <nav
           className={`md:hidden px-5 py-5 flex flex-col gap-5 border-t ${
-            isHero
-              ? 'bg-forest border-cream/10'
-              : 'bg-cream border-forest/10'
+            isHero ? 'bg-forest border-cream/10' : 'bg-cream border-forest/10'
           }`}
         >
-          {navLinks.map((link) => (
-            <Link
+          {NAV_LINKS.map((link) => (
+            <a
               key={link.href}
               href={link.href}
+              onClick={() => setOpen(false)}
               className={`font-sans text-base transition-colors ${
-                pathname === link.href
+                activeSection === link.href.slice(1)
                   ? isHero
                     ? 'text-mustard font-medium'
                     : 'text-terracotta font-medium'
@@ -103,10 +116,9 @@ export default function Header() {
                   ? 'text-cream/80'
                   : 'text-forest'
               }`}
-              onClick={() => setOpen(false)}
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
       )}

@@ -18,7 +18,7 @@ export async function GET(
   const guest = guests.find((g) => g.token === token)
 
   if (!guest) {
-    return NextResponse.redirect(`${baseUrl(request)}/invite/error`)
+    return NextResponse.redirect(`${baseUrl(request)}/invalid-link`)
   }
 
   const secret = new TextEncoder().encode(process.env.SESSION_SECRET!)
