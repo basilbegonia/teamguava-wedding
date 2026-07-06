@@ -47,16 +47,16 @@ export default function ScheduleSection() {
       <div className="max-w-sm mx-auto px-5">
 
         {/* Header */}
-        <h2 className="font-serif text-4xl font-bold mb-1">Mga Ganap</h2>
-        <p className="font-sans text-sm text-forest/50 mb-8">Nov. 27, 2026 | Friday</p>
+        <h2 className="font-serif text-4xl font-bold mb-1 text-center">Mga Ganap</h2>
+        <p className="font-sans text-base font-medium text-brown mb-8 text-center">Nov. 27, 2026 | Friday</p>
 
         {/* ── Event 1: Church ──────────────────────────────────────────── */}
-        <div className="flex items-start gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-4">
 
           {/* Blob decoration + portrait oval photo */}
-          <div className="relative flex-shrink-0 w-[162px] h-[228px]">
+          <div className="relative flex-shrink-0 w-[172px] h-[240px]">
             {/* Olive blob — bleeds off left edge */}
-            <div className="absolute -left-6 -top-2 w-[188px] h-[252px] pointer-events-none">
+            <div className="absolute -left-9 -top-4 w-[224px] h-[296px] pointer-events-none">
               <Image
                 src="/assets/mga-ganap/shape-3.png"
                 alt=""
@@ -67,14 +67,14 @@ export default function ScheduleSection() {
             </div>
             {/* Portrait oval photo — on top of blob */}
             <div
-              className="absolute overflow-hidden shadow-md"
+              className="absolute overflow-hidden"
               style={{
-                width: 138,
-                height: 194,
+                width: 156,
+                height: 216,
                 borderRadius: '50%',
                 top: '50%',
                 left: '50%',
-                transform: 'translate(-54%, -50%)',
+                transform: 'translate(-52%, -50%)',
               }}
             >
               <Image
@@ -82,7 +82,7 @@ export default function ScheduleSection() {
                 alt="St. John Bosco Parish"
                 fill
                 className="object-cover object-center"
-                sizes="138px"
+                sizes="156px"
               />
             </div>
           </div>
@@ -96,11 +96,11 @@ export default function ScheduleSection() {
             <p className="font-sans text-xs text-forest/55 mb-2">
               Antonio Arnaiz Avenue, cor. Amorsolo St.
             </p>
-            <p className="font-sans text-sm text-forest/80 leading-relaxed mb-2">
+            <p className="font-sans text-sm text-forest/80 leading-snug mb-2">
               30 years ago, Bea&apos;s parents got married here and 20 years ago, Basil was confirmed.
               Decades later, we&apos;re back for a full circle moment hehe
             </p>
-            <p className="font-sans text-xs text-forest/45 italic mb-3">Doors close 3:30 PM</p>
+            <p className="font-sans text-sm font-medium text-brown mb-3">Doors close 3:30 PM</p>
             <MapsLink href="https://maps.app.goo.gl/tDEFTmzGi2JvYjKP9" />
           </div>
         </div>
@@ -128,16 +128,16 @@ export default function ScheduleSection() {
               The Mess Hall, Makati
             </h3>
             <p className="font-sans text-xs text-forest/55 mb-2">Karrivin Plaza, Chino Roces Ave</p>
-            <p className="font-sans text-sm text-forest/80 leading-relaxed mb-3">
+            <p className="font-sans text-sm text-forest/80 leading-snug mb-3">
               For some merriment after we get married chos 😄
             </p>
             <MapsLink href="https://maps.app.goo.gl/3VxEg4FZSZ8u1RNKA" />
           </div>
 
           {/* Squiggle decoration + landscape oval photo */}
-          <div className="relative flex-shrink-0 w-[158px] h-[150px]">
+          <div className="relative flex-shrink-0 w-[170px] h-[162px]">
             {/* Orange squiggle — bleeds off right edge */}
-            <div className="absolute -right-6 -top-4 w-[186px] h-[186px] pointer-events-none">
+            <div className="absolute -right-9 -top-6 w-[224px] h-[224px] pointer-events-none">
               <Image
                 src="/assets/mga-ganap/shape-4.png"
                 alt=""
@@ -148,10 +148,10 @@ export default function ScheduleSection() {
             </div>
             {/* Landscape oval photo — slightly rotated, on top of squiggle */}
             <div
-              className="absolute overflow-hidden shadow-md"
+              className="absolute overflow-hidden"
               style={{
-                width: 152,
-                height: 114,
+                width: 168,
+                height: 126,
                 borderRadius: '50%',
                 top: '50%',
                 left: '50%',
@@ -163,7 +163,7 @@ export default function ScheduleSection() {
                 alt="The Mess Hall"
                 fill
                 className="object-cover object-center"
-                sizes="152px"
+                sizes="168px"
               />
             </div>
           </div>

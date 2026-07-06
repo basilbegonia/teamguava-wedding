@@ -3,125 +3,104 @@
 import { useEffect, useState } from 'react'
 
 const NAV_LINKS = [
-  { href: '#home',       label: 'Home' },
-  { href: '#story',      label: 'Our Story' },
-  { href: '#schedule',   label: 'Mga Ganap' },
-  { href: '#rsvp',       label: 'RSVP' },
-  { href: '#dress-code', label: 'Dress Code' },
+  { id: 'home',       label: 'Home' },
+  { id: 'story',      label: 'Our Story' },
+  { id: 'schedule',   label: 'Mga Ganap' },
+  { id: 'rsvp',       label: 'RSVP' },
+  { id: 'survey',     label: 'Survey' },
+  { id: 'dress-code', label: 'Dress Code' },
 ]
 
-const SECTION_IDS = NAV_LINKS.map((l) => l.href.slice(1))
+const SECTION_IDS = NAV_LINKS.map((l) => l.id)
 
 export default function Header() {
-  const [open, setOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
+  const [open, setOpen] = useState(false)
 
-  // Scroll-spy: mark whichever section's top has passed the header
+  // Scroll-spy: the last section whose top has scrolled above the threshold.
   useEffect(() => {
     function update() {
-      const scrollY = window.scrollY + 72 // 64px header + 8px buffer
       let current = SECTION_IDS[0]
       for (const id of SECTION_IDS) {
         const el = document.getElementById(id)
-        if (el && el.offsetTop <= scrollY) current = id
+        if (el && el.getBoundingClientRect().top <= 80) current = id
       }
       setActiveSection(current)
+      if (current === 'home') setOpen(false)
     }
     update()
     window.addEventListener('scroll', update, { passive: true })
-    return () => window.removeEventListener('scroll', update)
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
   }, [])
 
-  const isHero = activeSection === 'home'
+  // Explicit scroll — reliable on mobile where hash-link jumps can be swallowed
+  // by scroll-snap.
+  function go(id: string) {
+    setOpen(false)
+    if (id === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    const el = document.getElementById(id)
+    if (!el) return
+    const top = el.getBoundingClientRect().top + window.scrollY
+    window.scrollTo({ top, behavior: 'smooth' })
+  }
+
+  // Hidden on the landing (hero) section.
+  const hidden = activeSection === 'home'
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-colors duration-300 ${
-        isHero
-          ? 'bg-forest border-b border-cream/10'
-          : 'bg-cream/95 backdrop-blur-sm border-b border-forest/10'
+    <div
+      className={`fixed top-0 right-0 z-50 p-4 transition-all duration-300 ${
+        hidden ? '-translate-y-4 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
       }`}
     >
-      <div className="max-w-2xl mx-auto px-5 h-16 flex items-center justify-between">
-        {/* Wordmark — scrolls to top */}
-        <a
-          href="#home"
-          onClick={() => setOpen(false)}
-          className={`font-serif text-lg leading-none transition-colors ${
-            isHero ? 'text-cream' : 'text-forest'
-          }`}
-        >
-          bea &amp; basil &apos;26
-        </a>
+      {/* Hamburger button */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-label={open ? 'Close menu' : 'Open menu'}
+        aria-expanded={open}
+        className="relative z-10 ml-auto flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-full border border-forest/10 bg-cream/95 shadow-sm backdrop-blur-sm"
+      >
+        {[0, 1, 2].map((bar) => (
+          <span
+            key={bar}
+            className={`block h-0.5 w-5 origin-center bg-forest transition-all duration-200 ${
+              bar === 0 && open ? 'translate-y-[7px] rotate-45' : ''
+            } ${bar === 1 && open ? 'opacity-0' : ''} ${
+              bar === 2 && open ? '-translate-y-[7px] -rotate-45' : ''
+            }`}
+          />
+        ))}
+      </button>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-7">
+      {/* Dropdown menu */}
+      <nav
+        className={`absolute right-4 top-16 w-48 origin-top-right overflow-hidden rounded-2xl border border-forest/10 bg-cream shadow-lg transition-all duration-200 ${
+          open ? 'scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
+        }`}
+      >
+        <div className="flex flex-col py-2">
           {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className={`font-sans text-sm transition-colors ${
-                activeSection === link.href.slice(1)
-                  ? isHero
-                    ? 'text-mustard font-medium'
-                    : 'text-terracotta font-medium'
-                  : isHero
-                  ? 'text-cream/70 hover:text-cream'
-                  : 'text-forest/80 hover:text-forest'
+            <button
+              key={link.id}
+              onClick={() => go(link.id)}
+              className={`px-5 py-2.5 text-left font-sans text-sm transition-colors ${
+                activeSection === link.id
+                  ? 'font-medium text-terracotta'
+                  : 'text-forest/80 hover:bg-forest/5'
               }`}
             >
               {link.label}
-            </a>
+            </button>
           ))}
-        </nav>
-
-        {/* Hamburger — mobile only */}
-        <button
-          className="md:hidden flex flex-col justify-center gap-[5px] w-10 h-10 -mr-2"
-          onClick={() => setOpen((o) => !o)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
-        >
-          {[0, 1, 2].map((bar) => (
-            <span
-              key={bar}
-              className={`block w-6 h-0.5 origin-center transition-all duration-200 ${
-                isHero ? 'bg-cream' : 'bg-forest'
-              } ${bar === 0 && open ? 'rotate-45 translate-y-[7px]' : ''} ${
-                bar === 1 && open ? 'opacity-0' : ''
-              } ${bar === 2 && open ? '-rotate-45 -translate-y-[7px]' : ''}`}
-            />
-          ))}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {open && (
-        <nav
-          className={`md:hidden px-5 py-5 flex flex-col gap-5 border-t ${
-            isHero ? 'bg-forest border-cream/10' : 'bg-cream border-forest/10'
-          }`}
-        >
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className={`font-sans text-base transition-colors ${
-                activeSection === link.href.slice(1)
-                  ? isHero
-                    ? 'text-mustard font-medium'
-                    : 'text-terracotta font-medium'
-                  : isHero
-                  ? 'text-cream/80'
-                  : 'text-forest'
-              }`}
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-      )}
-    </header>
+        </div>
+      </nav>
+    </div>
   )
 }

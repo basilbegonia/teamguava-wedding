@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const SNACKS = [
   { id: 'kikiam',        name: 'Kikiam',                img: '/assets/something-yummy/kikiam.png' },
@@ -39,11 +39,28 @@ export default function SurveySection() {
   // sweet
   const [memory, setMemory] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Revoke the object URL when it changes or the component unmounts.
+  useEffect(() => {
+    return () => { if (imagePreview) URL.revokeObjectURL(imagePreview) }
+  }, [imagePreview])
+
+  function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] ?? null
+    setImageFile(f)
+    setImagePreview(f ? URL.createObjectURL(f) : null)
+  }
+
+  function clearImage() {
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   // spicy
   const [question, setQuestion] = useState('')
-  const [anonymous, setAnonymous] = useState(false)
   const [liked, setLiked] = useState<Set<number>>(new Set())
 
   function toggleSnack(id: string) {
@@ -96,7 +113,7 @@ export default function SurveySection() {
   async function submitSpicy() {
     setSaving(true)
     try {
-      await postSurvey('spicy', { question }, anonymous)
+      await postSurvey('spicy', { question })
     } finally {
       setSaving(false)
       setStep('done')
@@ -110,6 +127,7 @@ export default function SurveySection() {
         id="survey"
         className="bg-cream text-forest py-20 px-5 min-h-[80svh] flex flex-col items-center justify-center text-center gap-6"
       >
+        <p className="text-5xl">🎉</p>
         <h2 className="font-serif text-4xl font-bold">
           Thanks for <span className="whitespace-nowrap">RSVP-ing!</span>
         </h2>
@@ -223,7 +241,7 @@ export default function SurveySection() {
         <div className="max-w-sm mx-auto space-y-6">
           <div>
             <h2 className="font-serif text-3xl font-bold">
-              Something <span className="text-terracotta">sweet</span>
+              Something <span className="text-blush">sweet</span>
             </h2>
             <p className="font-sans font-bold text-base mt-3 leading-snug">
               What is a favourite memory you have with us / either of us? Bakit mo siya favorite?
@@ -234,7 +252,7 @@ export default function SurveySection() {
             value={memory}
             onChange={(e) => setMemory(e.target.value)}
             rows={6}
-            className="w-full rounded-2xl border border-forest/20 bg-transparent px-4 py-3 font-sans text-sm resize-none focus:border-forest focus:outline-none"
+            className="w-full rounded-2xl border border-forest/20 bg-transparent px-4 py-3 font-sans text-base resize-none focus:border-forest focus:outline-none"
           />
 
           {/* File upload — hidden input triggered by the label */}
@@ -243,7 +261,7 @@ export default function SurveySection() {
             type="file"
             accept="image/*"
             className="sr-only"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            onChange={pickImage}
           />
           <button
             type="button"
@@ -253,8 +271,27 @@ export default function SurveySection() {
             <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            {imageFile ? imageFile.name : 'Upload image (if any)'}
+            {imageFile ? 'Change image' : 'Upload image (if any)'}
           </button>
+
+          {/* Preview of the selected image */}
+          {imagePreview && (
+            <div className="relative w-full overflow-hidden rounded-2xl border border-forest/15">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imagePreview} alt="Selected preview" className="w-full max-h-64 object-cover" />
+              <button
+                type="button"
+                onClick={clearImage}
+                aria-label="Remove image"
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white text-sm flex items-center justify-center"
+              >
+                ✕
+              </button>
+              <p className="absolute bottom-0 inset-x-0 bg-black/45 text-white font-sans text-xs px-3 py-1.5 truncate">
+                {imageFile?.name}
+              </p>
+            </div>
+          )}
 
           <div className="flex gap-3">
             <button
@@ -294,22 +331,6 @@ export default function SurveySection() {
             questions na makuha namin dito: kahit serious, walang kwenta, s p i c y,
             intrusive, chismosa pa &apos;yan. HAHA
           </p>
-        </div>
-
-        <div className="flex items-center justify-end gap-2">
-          <span className="font-sans text-xs text-forest/50">Answer anonymously</span>
-          <button
-            onClick={() => setAnonymous(!anonymous)}
-            className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${
-              anonymous ? 'bg-forest' : 'bg-forest/20'
-            }`}
-          >
-            <span
-              className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                anonymous ? 'translate-x-5' : 'translate-x-1'
-              }`}
-            />
-          </button>
         </div>
 
         <textarea
