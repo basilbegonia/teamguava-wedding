@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const SNACKS = [
   { id: 'kikiam',        name: 'Kikiam',                img: '/assets/something-yummy/kikiam.png' },
@@ -14,11 +14,6 @@ const SNACKS = [
   { id: 'crab-balls',    name: 'Crab balls',            img: '/assets/something-yummy/crab-balls.png' },
 ]
 
-const SAMPLE_QUESTIONS = [
-  { id: 1, text: 'Why get married?', likes: 9 },
-  { id: 2, text: 'Sinong unang nagka-crush: si Bea o si Basil?', likes: 5 },
-]
-
 type Step = 'landing' | 'yummy' | 'sweet' | 'spicy' | 'done'
 
 async function postSurvey(step: string, response: unknown, anonymous = false) {
@@ -29,9 +24,18 @@ async function postSurvey(step: string, response: unknown, anonymous = false) {
   })
 }
 
-export default function SurveySection() {
+export default function SurveySection({ rsvped }: { rsvped: boolean }) {
   const [step, setStep] = useState<Step>('landing')
   const [saving, setSaving] = useState(false)
+
+  // Only show once the guest has an RSVP on record — or reveals it live when
+  // they submit their RSVP in this session (RSVPForm fires "rsvp:submitted").
+  const [revealed, setRevealed] = useState(rsvped)
+  useEffect(() => {
+    function onRsvp() { setRevealed(true) }
+    window.addEventListener('rsvp:submitted', onRsvp)
+    return () => window.removeEventListener('rsvp:submitted', onRsvp)
+  }, [])
 
   // yummy
   const [selectedSnacks, setSelectedSnacks] = useState<string[]>([])
@@ -39,12 +43,50 @@ export default function SurveySection() {
   // sweet
   const [memory, setMemory] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Revoke the object URL when it changes or the component unmounts.
+  useEffect(() => {
+    return () => { if (imagePreview) URL.revokeObjectURL(imagePreview) }
+  }, [imagePreview])
+
+  function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] ?? null
+    setImageFile(f)
+    setImagePreview(f ? URL.createObjectURL(f) : null)
+  }
+
+  function clearImage() {
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   // spicy
   const [question, setQuestion] = useState('')
-  const [anonymous, setAnonymous] = useState(false)
-  const [liked, setLiked] = useState<Set<number>>(new Set())
+
+  // "Other people's responses" — pulled semi-live from the Response highlights sheet.
+  const [highlights, setHighlights] = useState<string[]>([])
+  useEffect(() => {
+    let active = true
+    async function load() {
+      try {
+        const res = await fetch('/api/highlights')
+        if (!res.ok) return
+        const data = await res.json()
+        if (active && Array.isArray(data.highlights)) setHighlights(data.highlights)
+      } catch {
+        /* ignore transient fetch errors */
+      }
+    }
+    load()
+    const id = setInterval(load, 45000)
+    return () => {
+      active = false
+      clearInterval(id)
+    }
+  }, [])
 
   function toggleSnack(id: string) {
     setSelectedSnacks((prev) =>
@@ -54,19 +96,12 @@ export default function SurveySection() {
     )
   }
 
-  function toggleLike(id: number) {
-    setLiked((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
   async function submitYummy() {
     setSaving(true)
     try {
-      await postSurvey('yummy', { snacks: selectedSnacks })
+      await postSurvey('yummy', {
+        snacks: selectedSnacks.map((id) => SNACKS.find((s) => s.id === id)?.name ?? id),
+      })
     } finally {
       setSaving(false)
       setStep('sweet')
@@ -96,12 +131,15 @@ export default function SurveySection() {
   async function submitSpicy() {
     setSaving(true)
     try {
-      await postSurvey('spicy', { question }, anonymous)
+      await postSurvey('spicy', { question })
     } finally {
       setSaving(false)
       setStep('done')
     }
   }
+
+  // Hidden until the guest has RSVP'd.
+  if (!revealed) return null
 
   // ── Landing ───────────────────────────────────────────────────────────────
   if (step === 'landing') {
@@ -110,6 +148,7 @@ export default function SurveySection() {
         id="survey"
         className="bg-cream text-forest py-20 px-5 min-h-[80svh] flex flex-col items-center justify-center text-center gap-6"
       >
+        <p className="text-5xl">🎉</p>
         <h2 className="font-serif text-4xl font-bold">
           Thanks for <span className="whitespace-nowrap">RSVP-ing!</span>
         </h2>
@@ -122,6 +161,10 @@ export default function SurveySection() {
         >
           Tara
         </button>
+        <p className="font-sans text-sm text-forest/55 leading-snug max-w-xs">
+          No rush — you can come back anytime with the same invite link. It stays
+          valid, so feel free to finish later. 💚
+        </p>
       </div>
     )
   }
@@ -223,7 +266,7 @@ export default function SurveySection() {
         <div className="max-w-sm mx-auto space-y-6">
           <div>
             <h2 className="font-serif text-3xl font-bold">
-              Something <span className="text-terracotta">sweet</span>
+              Something <span className="text-blush">sweet</span>
             </h2>
             <p className="font-sans font-bold text-base mt-3 leading-snug">
               What is a favourite memory you have with us / either of us? Bakit mo siya favorite?
@@ -234,7 +277,7 @@ export default function SurveySection() {
             value={memory}
             onChange={(e) => setMemory(e.target.value)}
             rows={6}
-            className="w-full rounded-2xl border border-forest/20 bg-transparent px-4 py-3 font-sans text-sm resize-none focus:border-forest focus:outline-none"
+            className="w-full rounded-2xl border border-forest/20 bg-transparent px-4 py-3 font-sans text-base resize-none focus:border-forest focus:outline-none"
           />
 
           {/* File upload — hidden input triggered by the label */}
@@ -243,7 +286,7 @@ export default function SurveySection() {
             type="file"
             accept="image/*"
             className="sr-only"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            onChange={pickImage}
           />
           <button
             type="button"
@@ -253,8 +296,27 @@ export default function SurveySection() {
             <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            {imageFile ? imageFile.name : 'Upload image (if any)'}
+            {imageFile ? 'Change image' : 'Upload image (if any)'}
           </button>
+
+          {/* Preview of the selected image */}
+          {imagePreview && (
+            <div className="relative w-full overflow-hidden rounded-2xl border border-forest/15">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imagePreview} alt="Selected preview" className="w-full max-h-64 object-cover" />
+              <button
+                type="button"
+                onClick={clearImage}
+                aria-label="Remove image"
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white text-sm flex items-center justify-center"
+              >
+                ✕
+              </button>
+              <p className="absolute bottom-0 inset-x-0 bg-black/45 text-white font-sans text-xs px-3 py-1.5 truncate">
+                {imageFile?.name}
+              </p>
+            </div>
+          )}
 
           <div className="flex gap-3">
             <button
@@ -296,65 +358,24 @@ export default function SurveySection() {
           </p>
         </div>
 
-        <div className="flex items-center justify-end gap-2">
-          <span className="font-sans text-xs text-forest/50">Answer anonymously</span>
-          <button
-            onClick={() => setAnonymous(!anonymous)}
-            className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${
-              anonymous ? 'bg-forest' : 'bg-forest/20'
-            }`}
-          >
-            <span
-              className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                anonymous ? 'translate-x-5' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </div>
-
         <textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           rows={5}
-          className="w-full rounded-2xl border border-forest/20 bg-transparent px-4 py-3 font-sans text-sm resize-none focus:border-forest focus:outline-none"
+          className="w-full rounded-2xl border border-forest/20 bg-transparent px-4 py-3 font-sans text-base resize-none focus:border-forest focus:outline-none"
         />
 
-        {/* Other responses */}
-        <div className="space-y-3">
-          <div>
+        {/* Other people's responses — pulled from the Response highlights sheet */}
+        {highlights.length > 0 && (
+          <div className="space-y-3">
             <p className="font-sans font-bold text-sm">Other people&apos;s responses</p>
-            <p className="font-sans text-xs text-forest/50">
-              Like the questions you want us to answer
-            </p>
+            {highlights.map((text, i) => (
+              <div key={i} className="border-l-2 border-terracotta pl-3">
+                <p className="font-sans text-sm">{text}</p>
+              </div>
+            ))}
           </div>
-
-          {SAMPLE_QUESTIONS.map((q) => (
-            <div key={q.id} className="flex items-start gap-3 border-l-2 border-terracotta pl-3">
-              <p className="flex-1 font-sans text-sm">{q.text}</p>
-              <button
-                onClick={() => toggleLike(q.id)}
-                className="flex-shrink-0 flex items-center gap-1 mt-0.5"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill={liked.has(q.id) ? 'currentColor' : 'none'}
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path
-                    d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48a4.53 4.53 0 01-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.904M14.25 9h2.25M5.904 18.75c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 01-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 10.203 4.167 9.75 5 9.75h1.053c.472 0 .745.556.5.96a8.958 8.958 0 00-1.302 4.665c0 1.194.232 2.333.654 3.375z"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="font-sans text-xs text-forest/60">
-                  Like ({q.likes + (liked.has(q.id) ? 1 : 0)})
-                </span>
-              </button>
-            </div>
-          ))}
-        </div>
+        )}
 
         <div className="flex gap-3">
           <button

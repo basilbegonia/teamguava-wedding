@@ -25,7 +25,7 @@ export async function GET(
   const jwt = await new SignJWT({ name: guest.name, token })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('30d')
+    .setExpirationTime('180d')
     .sign(secret)
 
   const response = NextResponse.redirect(`${baseUrl(request)}/`)
@@ -33,7 +33,7 @@ export async function GET(
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+    maxAge: 60 * 60 * 24 * 180, // ~6 months
     path: '/',
   })
 

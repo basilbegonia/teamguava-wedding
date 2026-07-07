@@ -8,6 +8,10 @@
 }
 
 html {
+  /* Forest backstop: any uncovered area (iOS Safari URL-bar zone, overscroll)
+     shows green instead of a lighter gap. */
+  background: #4d573f;
+
   /* NOTE: no `scroll-behavior: smooth` here — on touch devices it stacks a
      fixed-duration animation on top of the native momentum snap, which reads
      as clunky. Leaving it off lets the browser use its momentum-aware snap
@@ -21,12 +25,29 @@ html {
   scroll-snap-type: y proximity;
 }
 
+/* Landing hero: fill the whole screen on iOS Safari, whatever the toolbar does.
+   Layered fallbacks — the last one the browser understands wins. */
+#home {
+  min-height: 100vh;                  /* baseline */
+  min-height: -webkit-fill-available; /* older iOS Safari */
+  /* modern: large viewport + the bottom safe-area inset, so the forest reaches
+     the very bottom edge behind the toolbar / home indicator */
+  min-height: calc(100lvh + env(safe-area-inset-bottom, 0px));
+}
+
 /* each section is a direct <div> child of <main> */
 main > div {
   scroll-snap-align: start;
   /* don't force a hard stop on every section — lets a firm flick glide past
      several sections with momentum instead of catching on each one */
   scroll-snap-stop: normal;
+}
+
+/* The hero ↔ story boundary is handled by JS (HeroSection) so it can be
+   direction-aware. Opt these two out of CSS snapping so it doesn't fight. */
+#home,
+#story {
+  scroll-snap-align: none;
 }
 
 /* Respect users who ask for less motion: turn snapping off entirely so the
@@ -46,5 +67,14 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Horizontal scroll without a visible scrollbar (used by the menu bar) */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }

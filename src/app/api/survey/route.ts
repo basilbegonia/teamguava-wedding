@@ -30,16 +30,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
-  const responseStr =
-    typeof body.response === 'string'
-      ? body.response
-      : JSON.stringify(body.response)
+  // Turn the step payload into plain, human-readable columns for the sheet.
+  const r =
+    typeof body.response === 'object' && body.response !== null
+      ? (body.response as Record<string, unknown>)
+      : {}
+
+  let response = ''
+  let photo = ''
+  if (body.step === 'yummy') {
+    response = Array.isArray(r.snacks) ? (r.snacks as string[]).join(', ') : ''
+  } else if (body.step === 'sweet') {
+    response = typeof r.memory === 'string' ? r.memory : ''
+    photo = typeof r.image_url === 'string' ? r.image_url : ''
+  } else if (body.step === 'spicy') {
+    response = typeof r.question === 'string' ? r.question : ''
+  } else {
+    response =
+      typeof body.response === 'string' ? body.response : JSON.stringify(body.response)
+  }
 
   await submitSurveyResponse({
     guest_token: body.anonymous ? 'anonymous' : guestToken,
     guest_name:  body.anonymous ? 'Anonymous'  : guestName,
     step:        body.step,
-    response:    responseStr,
+    response,
+    photo,
   })
 
   return NextResponse.json({ ok: true })

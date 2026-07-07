@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, DM_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -17,6 +17,14 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "Bea & Basil '26",
   description: "dis is it, pancit!",
+};
+
+export const viewport: Viewport = {
+  // Paint edge-to-edge into the iOS safe areas (behind the toolbar / home
+  // indicator) so the forest background fills the whole screen.
+  viewportFit: "cover",
+  // Tint Safari's browser chrome to match the hero.
+  themeColor: "#4d573f",
 };
 
 export default function RootLayout({

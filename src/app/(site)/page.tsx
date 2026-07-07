@@ -37,7 +37,7 @@ export default async function SpaPage() {
       <StorySection />
       <ScheduleSection />
       <RSVPForm party={party} existingRsvps={existingRsvps} />
-      <SurveySection />
+      <SurveySection rsvped={existingRsvps.some((r) => r !== null)} />
       <DressCodeSection />
     </>
   )

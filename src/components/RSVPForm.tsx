@@ -88,6 +88,11 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
       if (!res.ok) throw new Error(await res.text())
       setStatus('done')
       setEditing(false)
+      // Reveal the post-RSVP survey (hidden until now) and scroll to it.
+      window.dispatchEvent(new Event('rsvp:submitted'))
+      setTimeout(() => {
+        document.getElementById('survey')?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
     } catch {
       setStatus('error')
     }
@@ -101,26 +106,8 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
       id="rsvp"
       className="bg-cream text-forest flex flex-col items-center justify-start px-5 py-16 min-h-[60svh]"
     >
-      {/* ── Success banner ─────────────────────────────────────────────── */}
-      {status === 'done' && !editing ? (
-        <div className="w-full max-w-xl text-center space-y-4">
-          <p className="font-serif text-5xl">🎊</p>
-          <h2 className="font-serif text-3xl font-bold text-forest">
-            You&rsquo;re all set!
-          </h2>
-          <p className="font-sans text-forest/70">
-            We&rsquo;ve got your RSVP. See you soon!
-          </p>
-          <button
-            onClick={() => setEditing(true)}
-            className="mt-4 font-sans text-sm text-terracotta underline underline-offset-2"
-          >
-            Need to make a change?
-          </button>
-        </div>
-
-      ) : alreadySubmitted && !editing ? (
-        /* ── Read-only summary ─────────────────────────────────────────── */
+      {/* ── Read-only summary (shown once RSVP'd, or right after submitting) ── */}
+      {(alreadySubmitted || status === 'done') && !editing ? (
         <div className="w-full max-w-xl space-y-6">
           <div className="text-center space-y-1">
             <h2 className="font-serif text-3xl font-bold">Your RSVP</h2>
@@ -160,11 +147,6 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
           <div className="text-center space-y-1">
             <h2 className="font-serif text-3xl font-bold">RSVP</h2>
           </div>
-
-          {/* No plus ones note */}
-          <p className="font-sans text-xs text-terracotta leading-snug">
-            NOTE: we can only accommodate those we&rsquo;ve invited (no plus ones - sorry!) :(
-          </p>
 
           {/* Party callout */}
           {isParty && (
@@ -321,7 +303,7 @@ function MemberCard({ guest, index, total, state, onChange }: MemberCardProps) {
                 placeholder="e.g. peanuts, shellfish…"
                 value={state.allergies}
                 onChange={(e) => onChange({ allergies: e.target.value })}
-                className="w-full rounded-xl border border-forest/15 bg-transparent px-4 py-2.5 font-sans text-sm placeholder:text-forest/30 focus:border-forest focus:outline-none"
+                className="w-full rounded-xl border border-forest/15 bg-transparent px-4 py-2.5 font-sans text-base placeholder:text-forest/30 focus:border-forest focus:outline-none"
               />
             </div>
           </fieldset>
