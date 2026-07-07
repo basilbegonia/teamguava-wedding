@@ -88,7 +88,8 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
       if (!res.ok) throw new Error(await res.text())
       setStatus('done')
       setEditing(false)
-      // Take the guest to the post-RSVP thank-you / survey section.
+      // Reveal the post-RSVP survey (hidden until now) and scroll to it.
+      window.dispatchEvent(new Event('rsvp:submitted'))
       setTimeout(() => {
         document.getElementById('survey')?.scrollIntoView({ behavior: 'smooth' })
       }, 100)
@@ -146,11 +147,6 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
           <div className="text-center space-y-1">
             <h2 className="font-serif text-3xl font-bold">RSVP</h2>
           </div>
-
-          {/* No plus ones note */}
-          <p className="font-sans text-xs text-terracotta leading-snug">
-            NOTE: we can only accommodate those we&rsquo;ve invited (no plus ones - sorry!) :(
-          </p>
 
           {/* Party callout */}
           {isParty && (

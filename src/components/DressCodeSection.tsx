@@ -1,5 +1,14 @@
 import Image from 'next/image'
 
+const INSPO = [
+  'Feminine - 1.png',
+  'Feminine - 2.png',
+  'Feminine - 3.png',
+  'Masculine - 1.png',
+  'Masculine - 2.png',
+  'Masculine - 3.png',
+]
+
 export default function DressCodeSection() {
   return (
     <div id="dress-code" className="bg-cream text-forest py-16 overflow-hidden">
@@ -27,24 +36,33 @@ export default function DressCodeSection() {
         </div>
 
         {/* Inspo */}
-        <div className="space-y-4">
-          <p className="font-serif text-xl font-bold">Inspo:</p>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 snap-x snap-mandatory">
-            {['bg-terracotta/15', 'bg-mustard/20', 'bg-forest/10'].map((bg, i) => (
-              <div
-                key={i}
-                className={`flex-shrink-0 snap-start w-36 h-52 rounded-2xl ${bg} flex items-end justify-center pb-3`}
-              >
-                <span className="font-sans text-xs text-forest/30">inspo {i + 1}</span>
-              </div>
-            ))}
+        <div className="space-y-3">
+          <div className="flex items-baseline justify-between">
+            <p className="font-serif text-xl font-bold">Inspo:</p>
+            <span className="inline-flex items-center gap-1 font-sans text-xs text-forest/50 animate-pulse">
+              swipe
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </div>
+          <div className="relative -mx-5">
+            <div className="flex gap-3 overflow-x-auto pb-2 px-5 snap-x snap-mandatory no-scrollbar">
+              {INSPO.map((name, i) => (
+                <div key={i} className="flex-shrink-0 snap-start w-72 overflow-hidden rounded-2xl">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/assets/dress-code-page/${encodeURIComponent(name)}`}
+                    alt={`Dress code inspiration ${i + 1}`}
+                    className="w-full aspect-[4/3] object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+            {/* Right-edge fade hinting there's more to scroll */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-cream to-transparent" />
           </div>
         </div>
-
-        {/* Closing note */}
-        <p className="font-serif text-lg italic text-forest/40 text-center pb-4">
-          Most importantly — be comfortable enough to dance. 💃🕺
-        </p>
 
       </div>
     </div>

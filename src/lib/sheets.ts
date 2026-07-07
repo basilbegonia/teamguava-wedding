@@ -325,14 +325,37 @@ export async function getRSVP(token: string): Promise<RSVPData | null> {
   }
 }
 
-const SURVEY_RANGE = 'Survey!A:E'
-// A=timestamp, B=guest_token, C=guest_name, D=step, E=response
+const SURVEY_RANGE = 'Survey!A:F'
+// A=timestamp, B=guest_token, C=guest_name, D=step, E=response (human-readable), F=photo URL
+
+// Curated highlight responses shown under "Other people's responses".
+// Text lives in column A of the "Response highlights" tab (row 1 = header).
+const RESPONSE_HIGHLIGHTS_RANGE = "'Response highlights'!A:A"
+
+// Cached with a 30s TTL so it reads semi-live without hammering the Sheets API.
+export const getResponseHighlights = unstable_cache(
+  async (): Promise<string[]> => {
+    const sheets = getSheetsClient()
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: RESPONSE_HIGHLIGHTS_RANGE,
+    })
+    const rows = res.data.values ?? []
+    return rows
+      .slice(1) // skip header row
+      .map((r) => (r[0] ?? '').toString().trim())
+      .filter(Boolean)
+  },
+  ['response-highlights'],
+  { revalidate: 30, tags: ['response-highlights'] }
+)
 
 export async function submitSurveyResponse(entry: {
   guest_token: string
   guest_name: string
   step: string
   response: string
+  photo?: string
 }): Promise<void> {
   const sheets = getSheetsClient()
   await sheets.spreadsheets.values.append({
@@ -347,6 +370,7 @@ export async function submitSurveyResponse(entry: {
         entry.guest_name,
         entry.step,
         entry.response,
+        entry.photo ?? '',
       ]],
     },
   })
