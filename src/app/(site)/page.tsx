@@ -7,6 +7,7 @@ import ScheduleSection from '@/components/ScheduleSection'
 import RSVPForm from '@/components/RSVPForm'
 import SurveySection from '@/components/SurveySection'
 import DressCodeSection from '@/components/DressCodeSection'
+import DesktopQRGate from '@/components/DesktopQRGate'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +16,7 @@ export default async function SpaPage() {
   // can be pre-filled. Middleware already guarantees a valid session exists.
   let party: Guest[] = []
   let existingRsvps: (RSVPData | null)[] = []
+  let guestToken = ''
 
   try {
     const sessionCookie = cookies().get('guava_session')?.value
@@ -23,7 +25,7 @@ export default async function SpaPage() {
         sessionCookie,
         new TextEncoder().encode(process.env.SESSION_SECRET!)
       )
-      const guestToken = (payload as { token: string }).token
+      guestToken = (payload as { token: string }).token
       party = await getParty(guestToken)
       existingRsvps = await getPartyRSVPs(party.map((g) => g.token))
     }
@@ -33,6 +35,7 @@ export default async function SpaPage() {
 
   return (
     <>
+      <DesktopQRGate token={guestToken} />
       <HeroSection />
       <StorySection />
       <ScheduleSection />
