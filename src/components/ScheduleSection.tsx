@@ -29,9 +29,11 @@ export default function ScheduleSection() {
       {/* Full-width schedule image (venues, times + accents baked in) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/assets/mga-ganap/mga-ganap-whole-page.png"
+        src="/assets/mga-ganap/mga-ganap-whole-page.webp"
         alt="Schedule: 3:30 PM ceremony at St. John Bosco Parish, Makati; 6:00 PM reception at The Mess Hall, Makati"
         className="w-full h-auto"
+        loading="lazy"
+        decoding="async"
       />
 
       {/* Map links */}

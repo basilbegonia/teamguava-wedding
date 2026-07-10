@@ -17,6 +17,8 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "Bea & Basil '26",
   description: "dis is it, pancit!",
+  // Invite-only — keep it out of search engines.
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

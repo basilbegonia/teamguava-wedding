@@ -14,7 +14,14 @@ export async function GET(
 ) {
   const { token } = params
 
-  const guests = await getGuests()
+  let guests
+  try {
+    guests = await getGuests()
+  } catch {
+    // Sheets unreachable / rate-limited — not the guest's fault.
+    return NextResponse.redirect(`${baseUrl(request)}/invalid-link?e=1`)
+  }
+
   const guest = guests.find((g) => g.token === token)
 
   if (!guest) {

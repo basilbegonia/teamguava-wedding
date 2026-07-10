@@ -27,9 +27,11 @@ export default function StorySection() {
       {/* Photo collage — full-width, no side border (caption + accents baked in) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/assets/home-page/home-page-all-photos.png"
+        src="/assets/home-page/home-page-all-photos.webp"
         alt="Bea and Basil"
         className="w-full h-auto"
+        loading="lazy"
+        decoding="async"
       />
     </div>
   )

@@ -4,29 +4,34 @@ import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 const SNACKS = [
-  { id: 'kikiam',        name: 'Kikiam',                img: '/assets/something-yummy/kikiam.png' },
-  { id: 'cheese-balls',  name: 'Cheese Balls',          img: '/assets/something-yummy/cheese-balls.png' },
-  { id: 'chorizo',       name: 'Chorizo & Kesong Puti', img: '/assets/something-yummy/chorizo-kesong-puti.png' },
-  { id: 'squid-balls',   name: 'Squid balls',           img: '/assets/something-yummy/squid-balls.png' },
-  { id: 'bicol-express', name: 'Bicol Express',         img: '/assets/something-yummy/bicol-express.png' },
-  { id: 'fish-balls',    name: 'Fish balls',            img: '/assets/something-yummy/fish-balls.png' },
-  { id: 'lumpiang',      name: 'Lumpiang Shanghai',     img: '/assets/something-yummy/lumpiang-shanghai.png' },
-  { id: 'crab-balls',    name: 'Crab balls',            img: '/assets/something-yummy/crab-balls.png' },
+  { id: 'kikiam',        name: 'Kikiam',                img: '/assets/something-yummy/kikiam.webp' },
+  { id: 'cheese-balls',  name: 'Cheese Balls',          img: '/assets/something-yummy/cheese-balls.webp' },
+  { id: 'chorizo',       name: 'Chorizo & Kesong Puti', img: '/assets/something-yummy/chorizo-kesong-puti.webp' },
+  { id: 'squid-balls',   name: 'Squid balls',           img: '/assets/something-yummy/squid-balls.webp' },
+  { id: 'bicol-express', name: 'Bicol Express',         img: '/assets/something-yummy/bicol-express.webp' },
+  { id: 'fish-balls',    name: 'Fish balls',            img: '/assets/something-yummy/fish-balls.webp' },
+  { id: 'lumpiang',      name: 'Lumpiang Shanghai',     img: '/assets/something-yummy/lumpiang-shanghai.webp' },
+  { id: 'crab-balls',    name: 'Crab balls',            img: '/assets/something-yummy/crab-balls.webp' },
 ]
 
 type Step = 'landing' | 'yummy' | 'sweet' | 'spicy' | 'done'
 
 async function postSurvey(step: string, response: unknown, anonymous = false) {
-  await fetch('/api/survey', {
+  const res = await fetch('/api/survey', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ step, response, anonymous }),
   })
+  if (!res.ok) throw new Error('Failed to save survey response')
 }
 
 export default function SurveySection({ rsvped }: { rsvped: boolean }) {
   const [step, setStep] = useState<Step>('landing')
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(false)
+
+  // Clear any save error whenever we move to a new step.
+  useEffect(() => { setSaveError(false) }, [step])
 
   // Only show once the guest has an RSVP on record — or reveals it live when
   // they submit their RSVP in this session (RSVPForm fires "rsvp:submitted").
@@ -98,43 +103,51 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
 
   async function submitYummy() {
     setSaving(true)
+    setSaveError(false)
     try {
       await postSurvey('yummy', {
         snacks: selectedSnacks.map((id) => SNACKS.find((s) => s.id === id)?.name ?? id),
       })
+      setStep('sweet')
+    } catch {
+      setSaveError(true)
     } finally {
       setSaving(false)
-      setStep('sweet')
     }
   }
 
   async function submitSweet() {
     setSaving(true)
+    setSaveError(false)
     try {
       let imageUrl: string | undefined
       if (imageFile) {
         const fd = new FormData()
         fd.append('file', imageFile)
         const res = await fetch('/api/survey/upload', { method: 'POST', body: fd })
-        if (res.ok) {
-          const data = await res.json()
-          imageUrl = data.url
-        }
+        if (!res.ok) throw new Error('Image upload failed')
+        const data = await res.json()
+        imageUrl = data.url
       }
       await postSurvey('sweet', { memory, image_url: imageUrl ?? null })
+      setStep('spicy')
+    } catch {
+      setSaveError(true)
     } finally {
       setSaving(false)
-      setStep('spicy')
     }
   }
 
   async function submitSpicy() {
     setSaving(true)
+    setSaveError(false)
     try {
       await postSurvey('spicy', { question })
+      setStep('done')
+    } catch {
+      setSaveError(true)
     } finally {
       setSaving(false)
-      setStep('done')
     }
   }
 
@@ -238,6 +251,12 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
             {selectedSnacks.length}/3 selected
           </p>
 
+          {saveError && (
+            <p className="font-sans text-sm text-terracotta text-center">
+              Couldn&apos;t save — please check your connection and try again.
+            </p>
+          )}
+
           <div className="flex gap-3">
             <button
               disabled={saving}
@@ -318,6 +337,12 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
             </div>
           )}
 
+          {saveError && (
+            <p className="font-sans text-sm text-terracotta text-center">
+              Couldn&apos;t save — please check your connection and try again.
+            </p>
+          )}
+
           <div className="flex gap-3">
             <button
               disabled={saving}
@@ -375,6 +400,12 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
               </div>
             ))}
           </div>
+        )}
+
+        {saveError && (
+          <p className="font-sans text-sm text-terracotta text-center">
+            Couldn&apos;t save — please check your connection and try again.
+          </p>
         )}
 
         <div className="flex gap-3">
