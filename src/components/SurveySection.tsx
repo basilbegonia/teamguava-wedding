@@ -25,6 +25,42 @@ async function postSurvey(step: string, response: unknown, anonymous = false) {
   if (!res.ok) throw new Error('Failed to save survey response')
 }
 
+// Downscale + re-encode an image on the client so uploads stay well under
+// Vercel's request-body limit. Throws if the image can't be processed.
+async function resizeImage(file: File, maxDim = 1600, quality = 0.82): Promise<File> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error('read failed'))
+    reader.readAsDataURL(file)
+  })
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    // window.Image (the DOM constructor) — not next/image's default export.
+    const im = new window.Image()
+    im.onload = () => resolve(im)
+    im.onerror = () => reject(new Error('decode failed'))
+    im.src = dataUrl
+  })
+  const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
+  const w = Math.max(1, Math.round(img.width * scale))
+  const h = Math.max(1, Math.round(img.height * scale))
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('no canvas context')
+  ctx.drawImage(img, 0, 0, w, h)
+  const blob = await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error('encode failed'))),
+      'image/jpeg',
+      quality
+    )
+  )
+  const name = file.name.replace(/\.[^.]+$/, '') + '.jpg'
+  return new File([blob], name, { type: 'image/jpeg' })
+}
+
 export default function SurveySection({ rsvped }: { rsvped: boolean }) {
   const [step, setStep] = useState<Step>('landing')
   const [saving, setSaving] = useState(false)
@@ -49,6 +85,8 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
   const [memory, setMemory] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageError, setImageError] = useState(false)
+  const [processingImage, setProcessingImage] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Revoke the object URL when it changes or the component unmounts.
@@ -56,15 +94,31 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
     return () => { if (imagePreview) URL.revokeObjectURL(imagePreview) }
   }, [imagePreview])
 
-  function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
+  async function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null
-    setImageFile(f)
-    setImagePreview(f ? URL.createObjectURL(f) : null)
+    if (!f) { clearImage(); return }
+    setImageError(false)
+    setProcessingImage(true)
+    try {
+      const resized = await resizeImage(f)
+      // Safety net: if it's still huge (e.g. an odd format), reject it.
+      if (resized.size > 4 * 1024 * 1024) throw new Error('still too large')
+      setImageFile(resized)
+      setImagePreview(URL.createObjectURL(resized))
+    } catch {
+      setImageFile(null)
+      setImagePreview(null)
+      setImageError(true)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    } finally {
+      setProcessingImage(false)
+    }
   }
 
   function clearImage() {
     setImageFile(null)
     setImagePreview(null)
+    setImageError(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -318,6 +372,15 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
             {imageFile ? 'Change image' : 'Upload image (if any)'}
           </button>
 
+          {processingImage && (
+            <p className="font-sans text-xs text-forest/50">Processing image…</p>
+          )}
+          {imageError && (
+            <p className="font-sans text-sm text-terracotta">
+              That image couldn&apos;t be used — please try a smaller one or a different photo.
+            </p>
+          )}
+
           {/* Preview of the selected image */}
           {imagePreview && (
             <div className="relative w-full overflow-hidden rounded-2xl border border-forest/15">
@@ -352,7 +415,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
               Skip
             </button>
             <button
-              disabled={saving}
+              disabled={saving || processingImage}
               onClick={submitSweet}
               className="flex-1 bg-forest text-cream font-sans font-medium rounded-full py-3 disabled:opacity-50"
             >
