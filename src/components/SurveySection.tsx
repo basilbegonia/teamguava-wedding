@@ -255,6 +255,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
     return (
       <div id="survey" className="bg-cream text-forest py-16 px-5">
         <div className="max-w-sm mx-auto space-y-6">
+          <StepHeader current={1} onBack={() => setStep('landing')} />
           <div>
             <h2 className="font-serif text-3xl font-bold">
               Something <span className="text-mustard">yummy</span>
@@ -337,6 +338,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
     return (
       <div id="survey" className="bg-cream text-forest py-16 px-5">
         <div className="max-w-sm mx-auto space-y-6">
+          <StepHeader current={2} onBack={() => setStep('yummy')} />
           <div>
             <h2 className="font-serif text-3xl font-bold">
               Something <span className="text-blush">sweet</span>
@@ -431,6 +433,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
   return (
     <div id="survey" className="bg-cream text-forest py-16 px-5">
       <div className="max-w-sm mx-auto space-y-6">
+        <StepHeader current={3} onBack={() => setStep('sweet')} />
         <div>
           <h2 className="font-serif text-3xl font-bold">
             Something <span className="text-terracotta">spicy</span>
@@ -488,6 +491,51 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+// Progress dots (1·2·3) across the three survey questions.
+function StepProgress({ current }: { current: number }) {
+  return (
+    <div className="flex items-center" aria-label={`Question ${current} of 3`}>
+      {[1, 2, 3].map((n, idx) => (
+        <div key={n} className={`flex items-center ${idx < 2 ? 'flex-1' : ''}`}>
+          <span
+            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full font-sans text-xs font-bold transition-colors ${
+              n <= current ? 'bg-forest text-cream' : 'bg-forest/10 text-forest/40'
+            }`}
+          >
+            {n}
+          </span>
+          {idx < 2 && (
+            <span
+              className={`mx-1 h-0.5 flex-1 rounded transition-colors ${
+                n < current ? 'bg-forest' : 'bg-forest/10'
+              }`}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Back button + progress, shown at the top of each survey question.
+function StepHeader({ current, onBack }: { current: number; onBack: () => void }) {
+  return (
+    <div className="space-y-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-1 font-sans text-sm text-forest/60 hover:text-forest"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Back
+      </button>
+      <StepProgress current={current} />
     </div>
   )
 }

@@ -15,14 +15,14 @@ export default function DressCodeSection() {
       <div className="max-w-sm mx-auto px-5 space-y-8">
 
         {/* Heading */}
-        <h2 className="font-serif text-4xl font-bold leading-tight">
-          Come dressed<br />to celebrate!
+        <h2 className="font-serif text-4xl font-bold leading-tight text-center">
+          Dress code
         </h2>
 
         {/* Chart */}
         <div className="space-y-3">
           <p className="font-sans text-sm text-forest/80 leading-snug">
-            Come in your most Fun &amp; Festive cocktail attire
+            Come in any color, as long as it's festive, fun, and brings you joy.
           </p>
           <div className="relative w-full aspect-[4/5]">
             <Image
@@ -37,9 +37,9 @@ export default function DressCodeSection() {
 
         {/* Inspo */}
         <div className="space-y-3">
-          <div className="flex items-baseline justify-between">
-            <p className="font-serif text-xl font-bold">Inspo:</p>
-            <span className="inline-flex items-center gap-1 font-sans text-xs text-forest/50 animate-pulse">
+          <div className="text-center space-y-1">
+            <p className="font-serif text-xl font-bold">Inspiration</p>
+            <span className="inline-flex items-center justify-center gap-1 font-sans text-xs text-forest/50 animate-pulse">
               swipe
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />

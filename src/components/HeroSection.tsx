@@ -10,12 +10,19 @@ const COLOR_CYCLE = [
 
 export default function HeroSection() {
   const [frame, setFrame] = useState(0)
+  const [showHint, setShowHint] = useState(false)
 
   useEffect(() => {
     const id = setInterval(() => {
       setFrame((f) => (f + 1) % COLOR_CYCLE.length)
     }, 650)
     return () => clearInterval(id)
+  }, [])
+
+  // Nudge the guest to scroll down after a beat.
+  useEffect(() => {
+    const t = setTimeout(() => setShowHint(true), 1000)
+    return () => clearTimeout(t)
   }, [])
 
   // The landing should never rest half-scrolled. When scrolling settles while
@@ -68,7 +75,7 @@ export default function HeroSection() {
   return (
     <div
       id="home"
-      className="bg-forest flex flex-col items-center justify-center px-8 pb-16"
+      className="relative bg-forest flex flex-col items-center justify-center px-8 pb-16"
     >
       <div className="flex flex-col gap-1 text-center">
         <p className={`font-serif text-4xl md:text-6xl font-bold transition-colors duration-200 ${c0}`}>
@@ -82,6 +89,20 @@ export default function HeroSection() {
         </p>
       </div>
 
+      {/* Scroll-down hint — appears after a second, tap to scroll down */}
+      {showHint && (
+        <button
+          type="button"
+          onClick={() => document.getElementById('story')?.scrollIntoView({ behavior: 'smooth' })}
+          aria-label="Scroll down"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-cream/70 animate-fade-up transition-colors hover:text-cream"
+        >
+          <span className="font-sans text-[11px] uppercase tracking-widest">scroll</span>
+          <svg className="w-6 h-6 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      )}
     </div>
   )
 }
