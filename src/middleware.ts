@@ -8,13 +8,13 @@ export async function middleware(req: NextRequest) {
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) return NextResponse.next()
 
   const token = req.cookies.get('guava_session')?.value
-  if (!token) return NextResponse.redirect(new URL('/invalid-link', req.url))
+  if (!token) return NextResponse.redirect(new URL('/invalid-link?reason=expired', req.url))
 
   try {
     await jwtVerify(token, new TextEncoder().encode(process.env.SESSION_SECRET!))
     return NextResponse.next()
   } catch {
-    return NextResponse.redirect(new URL('/invalid-link', req.url))
+    return NextResponse.redirect(new URL('/invalid-link?reason=expired', req.url))
   }
 }
 

@@ -19,7 +19,7 @@ export async function GET(
     guests = await getGuests()
   } catch {
     // Sheets unreachable / rate-limited — not the guest's fault.
-    return NextResponse.redirect(`${baseUrl(request)}/invalid-link?e=1`)
+    return NextResponse.redirect(`${baseUrl(request)}/invalid-link?reason=error`)
   }
 
   const guest = guests.find((g) => g.token === token)

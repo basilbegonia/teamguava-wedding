@@ -3,6 +3,7 @@ import { jwtVerify } from 'jose'
 import { getParty, getPartyRSVPs, type Guest, type RSVPData } from '@/lib/sheets'
 import HeroSection from '@/components/HeroSection'
 import StorySection from '@/components/StorySection'
+import OurStorySection from '@/components/OurStorySection'
 import ScheduleSection from '@/components/ScheduleSection'
 import RSVPForm from '@/components/RSVPForm'
 import SurveySection from '@/components/SurveySection'
@@ -38,6 +39,7 @@ export default async function SpaPage() {
       <DesktopQRGate token={guestToken} />
       <HeroSection />
       <StorySection />
+      <OurStorySection />
       <ScheduleSection />
       <RSVPForm party={party} existingRsvps={existingRsvps} />
       <SurveySection rsvped={existingRsvps.some((r) => r !== null)} />

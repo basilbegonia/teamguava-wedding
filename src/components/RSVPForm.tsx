@@ -20,8 +20,8 @@ interface RSVPFormProps {
 
 const ATTENDANCE_OPTIONS: { value: Attendance; label: string }[] = [
   { value: 'ceremony_and_reception', label: 'Yes (ceremony + reception)' },
-  { value: 'ceremony_only',          label: 'Yes (ceremony only) :(' },
-  { value: 'not_coming',             label: 'No :( :(' },
+  { value: 'ceremony_only',          label: 'Yes (ceremony only)' },
+  { value: 'not_coming',             label: 'Sorry, I can\'t go' },
 ]
 
 const DIETARY_OPTIONS = [
@@ -34,11 +34,9 @@ const DIETARY_OPTIONS = [
 ]
 
 const TRANSPORT_OPTIONS = [
-  'Bringing my own car',
-  'Carpooling with someone',
-  'Commuting',
-  'Grab / Taxi',
-  'Not sure yet',
+  'Yes, I\'d like some help',
+  'No, but I need my own parking spot',
+  'No, I got it (I\'m arranging my own transport',
 ]
 
 function initMemberState(existing: RSVPData | null): MemberState {
@@ -125,8 +123,7 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
                   <p className="font-sans text-sm text-forest/60">Dietary: {m.dietary.join(', ')}</p>
                 )}
                 {m.allergies && <p className="font-sans text-sm text-forest/60">Allergies: {m.allergies}</p>}
-                {m.transport && <p className="font-sans text-sm text-forest/60">Getting there: {m.transport}</p>}
-                {m.transport_home && <p className="font-sans text-sm text-forest/60">Going home: {m.transport_home}</p>}
+                {m.transport && <p className="font-sans text-sm text-forest/60">Transport help: {m.transport}</p>}
               </div>
             )
           })}
@@ -308,10 +305,10 @@ function MemberCard({ guest, index, total, state, onChange }: MemberCardProps) {
             </div>
           </fieldset>
 
-          {/* Transport to */}
+          {/* Transport help */}
           <fieldset className="space-y-2">
             <legend className="font-sans text-sm font-bold text-forest mb-3">
-              How are you getting to the wedding?
+              Do you need help with arranging transport, to/from the church or reception?
             </legend>
             <div className="flex flex-col gap-2">
               {TRANSPORT_OPTIONS.map((opt) => (
@@ -322,28 +319,6 @@ function MemberCard({ guest, index, total, state, onChange }: MemberCardProps) {
                     value={opt}
                     checked={state.transport === opt}
                     onChange={() => onChange({ transport: opt })}
-                    className="accent-forest w-4 h-4 flex-shrink-0"
-                  />
-                  <span className="font-sans text-sm">{opt}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          {/* Transport home */}
-          <fieldset className="space-y-2">
-            <legend className="font-sans text-sm font-bold text-forest mb-3">
-              How are you going home?
-            </legend>
-            <div className="flex flex-col gap-2">
-              {TRANSPORT_OPTIONS.map((opt) => (
-                <label key={opt} className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`transport-home-${guest.token}`}
-                    value={opt}
-                    checked={state.transport_home === opt}
-                    onChange={() => onChange({ transport_home: opt })}
                     className="accent-forest w-4 h-4 flex-shrink-0"
                   />
                   <span className="font-sans text-sm">{opt}</span>
