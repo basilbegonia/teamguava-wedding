@@ -22,7 +22,7 @@ export default function DressCodeSection() {
         {/* Chart */}
         <div className="space-y-3">
           <p className="font-sans text-sm text-forest/80 leading-snug">
-            Come in any color, as long as it's festive, fun, and brings you joy.
+            Come in any color, as long as it&rsquo;s festive, fun, and brings you joy.
           </p>
           <div className="relative w-full aspect-[4/5]">
             <Image
