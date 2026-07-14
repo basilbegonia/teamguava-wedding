@@ -205,6 +205,16 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
     }
   }
 
+  // Start a fresh round: clear every answer and return to question 1.
+  function resetSurvey() {
+    setSelectedSnacks([])
+    setMemory('')
+    setQuestion('')
+    clearImage()
+    setSaveError(false)
+    setStep('yummy')
+  }
+
   // Hidden until the guest has RSVP'd.
   if (!revealed) return null
 
@@ -245,6 +255,16 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
         <p className="font-serif text-5xl mb-4">🎉</p>
         <h2 className="font-serif text-2xl font-bold">Salamat!</h2>
         <p className="font-sans text-sm text-forest/60 mt-2">See you on Nov. 27!</p>
+        <button
+          type="button"
+          onClick={resetSurvey}
+          className="mt-6 font-sans text-sm text-terracotta underline underline-offset-2"
+        >
+          Make a new submission
+        </button>
+        <p className="font-sans text-xs text-forest/45 mt-1.5 max-w-xs">
+          Got another memory or question? Go for another round. 😄
+        </p>
       </div>
     )
   }
