@@ -36,7 +36,7 @@ const DIETARY_OPTIONS = [
 const TRANSPORT_OPTIONS = [
   'Yes, I\'d like some help',
   'No, but I need my own parking spot',
-  'No, I got it (I\'m arranging my own transport',
+  'No, I got it (I\'m arranging my own transport)',
 ]
 
 function initMemberState(existing: RSVPData | null): MemberState {

@@ -229,8 +229,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
           Tara
         </button>
         <p className="font-sans text-sm text-forest/55 leading-snug max-w-xs">
-          No rush — you can come back anytime with the same invite link. It stays
-          valid, so feel free to finish later. 💚
+          No rush - you can come back any time with the same invite link. 🙂
         </p>
       </div>
     )

@@ -39,11 +39,11 @@ export default async function SpaPage() {
       <DesktopQRGate token={guestToken} />
       <HeroSection />
       <StorySection />
-      <OurStorySection />
       <ScheduleSection />
       <RSVPForm party={party} existingRsvps={existingRsvps} />
       <SurveySection rsvped={existingRsvps.some((r) => r !== null)} />
       <DressCodeSection />
+      <OurStorySection />
     </>
   )
 }
