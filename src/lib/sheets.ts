@@ -301,6 +301,9 @@ export async function submitPartyRSVPs(rsvps: RSVPData[]): Promise<void> {
 
   // Mark rsvp_submitted_at for every party member
   await markRsvpSubmitted(rsvps.map((r) => r.guest_token))
+
+  // New answers are live — drop the cached RSVP reads.
+  revalidateTag('rsvps')
 }
 
 // Returns the existing RSVP row for a guest token, or null if not found.
@@ -379,9 +382,12 @@ export async function submitSurveyResponse(entry: {
 /**
  * Fetches RSVPs for multiple tokens in a single Sheets read.
  * Returns an array in the same order as the input tokens.
+ * Cached per party (args are part of the cache key) with a 60s TTL —
+ * tag: 'rsvps', invalidated by submitPartyRSVPs.
  */
-export async function getPartyRSVPs(tokens: string[]): Promise<(RSVPData | null)[]> {
-  if (tokens.length === 0) return []
+export const getPartyRSVPs = unstable_cache(
+  async (tokens: string[]): Promise<(RSVPData | null)[]> => {
+    if (tokens.length === 0) return []
 
   const sheets = getSheetsClient()
   const res = await sheets.spreadsheets.values.get({
@@ -408,5 +414,8 @@ export async function getPartyRSVPs(tokens: string[]): Promise<(RSVPData | null)
     }
   })
 
-  return tokens.map((t) => rsvpMap.get(t) ?? null)
-}
+    return tokens.map((t) => rsvpMap.get(t) ?? null)
+  },
+  ['party-rsvps'],
+  { revalidate: 60, tags: ['rsvps'] }
+)
