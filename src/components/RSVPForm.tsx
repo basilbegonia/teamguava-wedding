@@ -143,6 +143,7 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
         <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-8">
           <div className="text-center space-y-1">
             <h2 className="font-serif text-3xl font-bold">RSVP</h2>
+            <p className="font-sans text-base font-medium text-brown text-center">Please let us know if you can make it by 30 August 🙂</p>
           </div>
 
           {/* Party callout */}
