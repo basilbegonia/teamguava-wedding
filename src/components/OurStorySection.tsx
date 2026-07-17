@@ -1,8 +1,8 @@
 import Carousel from './Carousel'
 
-const SLIDES = Array.from({ length: 10 }, (_, i) => ({
+const SLIDES = Array.from({ length: 11 }, (_, i) => ({
   src: `/assets/our-story/chapter-1/chapter1-${i + 1}.webp`,
-  alt: `Our story — slide ${i + 1} of 10`,
+  alt: `Our story — slide ${i + 1} of 11`,
 }))
 
 export default function OurStorySection() {
