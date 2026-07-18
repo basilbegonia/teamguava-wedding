@@ -36,7 +36,7 @@ const DIETARY_OPTIONS = [
 const TRANSPORT_OPTIONS = [
   'Yes, I\'d like some help',
   'No, but I need my own parking spot',
-  'No, I got it (I\'m arranging my own transport)',
+  'No, I got it (I\'m arranging my own transport/riding with someone)',
 ]
 
 function initMemberState(existing: RSVPData | null): MemberState {
@@ -143,7 +143,10 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
         <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-8">
           <div className="text-center space-y-1">
             <h2 className="font-serif text-3xl font-bold">RSVP</h2>
-            <p className="font-sans text-base font-medium text-brown text-center">Please let us know if you can make it by 30 August 🙂</p>
+            <p className="font-sans text-base font-medium text-brown text-center">
+              Please let us know if you can make it{' '}
+              <span className="whitespace-nowrap">by August 30 🙂</span>
+            </p>
           </div>
 
           {/* Party callout */}

@@ -19,7 +19,7 @@ export default function StorySection() {
     <div id="story" className="relative bg-cream text-forest overflow-hidden py-16">
       {/* The collage image already includes the caption + blob decorations. */}
       <div className="relative w-full max-w-sm mx-auto px-5 mb-10">
-        <h2 className="font-serif text-[clamp(2rem,8.5vw,2.75rem)] font-bold text-forest leading-none whitespace-nowrap">
+        <h2 className="font-serif text-[clamp(2rem,8.5vw,2.75rem)] font-bold text-forest leading-none whitespace-nowrap text-center">
           Tara,&nbsp;{PHRASES[i]}
         </h2>
       </div>

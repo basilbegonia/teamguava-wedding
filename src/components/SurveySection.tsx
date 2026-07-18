@@ -230,7 +230,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
           Thanks for <span className="whitespace-nowrap">RSVP-ing!</span>
         </h2>
         <p className="font-serif text-2xl font-bold text-terracotta leading-snug">
-          Please help us make<br />our day extra special.
+          Tell us a few things and help us make<br />our day extra special. All responses are anonymous.
         </p>
         <button
           onClick={() => setStep('yummy')}
@@ -363,7 +363,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
               Something <span className="text-blush">sweet</span>
             </h2>
             <p className="font-sans font-bold text-base mt-3 leading-snug">
-              What is a favourite memory you have with us / either of us? Bakit mo siya favorite?
+              What is a favorite memory you have with us / either of us? Bakit mo siya favorite?
             </p>
           </div>
 
@@ -461,10 +461,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
             Do you have a question you are curious about / want to ask us? 💀
           </p>
           <p className="font-sans text-sm text-forest/70 mt-2 leading-relaxed">
-            Iho-hotseat kami sa reception. We will answer{' '}
-            <span className="underline">any</span> question na mabubunot mula sa lahat ng
-            questions na makuha namin dito: kahit serious, walang kwenta, s p i c y,
-            intrusive, chismosa pa &apos;yan. HAHA
+            Serious, walang kwenta, spicy, o intrusive - go lang. Malay mo baka mabunot pag hinot-seat kami HAHA.
           </p>
         </div>
 
