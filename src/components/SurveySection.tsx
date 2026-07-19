@@ -230,7 +230,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
           Thanks for <span className="whitespace-nowrap">RSVP-ing!</span>
         </h2>
         <p className="font-serif text-2xl font-bold text-terracotta leading-snug">
-          Tell us a few things and help us make<br />our day extra special. All responses are anonymous.
+          Tell us a few things and help us make<br />our day extra special.<br />All responses are anonymous.
         </p>
         <button
           onClick={() => setStep('yummy')}
@@ -238,7 +238,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
         >
           Tara
         </button>
-        <p className="font-sans text-sm text-forest/55 leading-snug max-w-xs">
+        <p className="font-sans text-base font-medium text-brown leading-snug max-w-xs">
           No rush - you can come back any time (until October 17, 2026) with the same invite link. 🙂
         </p>
       </div>
@@ -283,7 +283,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
               Vote for your top 3 favorite snacks!
             </p>
             <p className="font-sans text-sm text-forest/60">
-              We&apos;ll serve the winners at the reception. 😄
+              The top 3 with the most votes will be served at the reception 😋
             </p>
           </div>
 
