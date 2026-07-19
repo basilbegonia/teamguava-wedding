@@ -79,19 +79,24 @@ export const getGuests = unstable_cache(
 )
 
 /**
- * Returns all guests in the same party as the given token.
- * If the guest has no party_id, returns just that guest as a solo party.
+ * Returns all members of the party the token belongs to.
+ * One token is shared by every member row of a party; party_id still groups
+ * members as a fallback for rows where the token wasn't copied.
+ * Rows without a name (spare/unassigned tokens) are ignored.
  */
 export async function getParty(token: string): Promise<Guest[]> {
   const guests = await getGuests()
-  const guest = guests.find((g) => g.token === token)
-  if (!guest) return []
-  if (!guest.party_id) return [guest]
-  return guests.filter((g) => g.party_id === guest.party_id)
+  const matches = guests.filter((g) => g.name && g.token === token)
+  if (matches.length === 0) return []
+  const partyIds = new Set(matches.map((g) => g.party_id).filter(Boolean))
+  if (partyIds.size === 0) return matches
+  return guests.filter(
+    (g) => g.name && (g.token === token || partyIds.has(g.party_id))
+  )
 }
 
-// Finds guest row by token and writes the current timestamp to visited_at (column D).
-// Invalidates the guests cache after writing.
+// Writes the current timestamp to visited_at (column D) on every row carrying
+// this token (the whole party shares one link). Invalidates the guests cache.
 export async function markVisited(token: string): Promise<void> {
   const sheets = getSheetsClient()
   const res = await sheets.spreadsheets.values.get({
@@ -99,26 +104,30 @@ export async function markVisited(token: string): Promise<void> {
     range: GUESTS_RANGE,
   })
   const rows = res.data.values ?? []
-  // Row 0 is the header; data starts at row index 1 → sheet row 2
-  const rowIndex = rows.findIndex(
-    (row, i) => i > 0 && row[G.token] === token
-  )
-  if (rowIndex === -1) return
+  const now = new Date().toISOString()
 
-  const sheetRowNumber = rowIndex + 1 // 1-based
-  await sheets.spreadsheets.values.update({
+  // Row 0 is the header; data starts at row index 1 → sheet row 2
+  const updates = rows
+    .map((row, i) =>
+      i > 0 && row[G.token] === token
+        ? { range: `Guests!D${i + 1}`, values: [[now]] }
+        : null
+    )
+    .filter((u): u is NonNullable<typeof u> => u !== null)
+
+  if (updates.length === 0) return
+
+  await sheets.spreadsheets.values.batchUpdate({
     spreadsheetId: SPREADSHEET_ID,
-    range: `Guests!D${sheetRowNumber}`,
-    valueInputOption: 'RAW',
-    requestBody: { values: [[new Date().toISOString()]] },
+    requestBody: { valueInputOption: 'RAW', data: updates },
   })
 
   revalidateTag('guests')
 }
 
 /**
- * Marks rsvp_submitted_at (column E) for each of the given tokens in one
- * batchUpdate call. Invalidates the guests cache afterwards.
+ * Marks rsvp_submitted_at (column E) on every row carrying one of the given
+ * tokens, in one batchUpdate call. Invalidates the guests cache afterwards.
  */
 export async function markRsvpSubmitted(tokens: string[]): Promise<void> {
   if (tokens.length === 0) return
@@ -130,18 +139,14 @@ export async function markRsvpSubmitted(tokens: string[]): Promise<void> {
   })
   const rows = res.data.values ?? []
   const now = new Date().toISOString()
+  const tokenSet = new Set(tokens)
 
-  const updates = tokens
-    .map((token) => {
-      const rowIndex = rows.findIndex(
-        (row, i) => i > 0 && row[G.token] === token
-      )
-      if (rowIndex === -1) return null
-      return {
-        range: `Guests!E${rowIndex + 1}`,
-        values: [[now]],
-      }
-    })
+  const updates = rows
+    .map((row, i) =>
+      i > 0 && tokenSet.has(row[G.token])
+        ? { range: `Guests!E${i + 1}`, values: [[now]] }
+        : null
+    )
     .filter((u): u is NonNullable<typeof u> => u !== null)
 
   if (updates.length === 0) return
@@ -244,8 +249,12 @@ export async function submitPartyRSVPs(rsvps: RSVPData[]): Promise<void> {
   const toUpdate: Array<{ rowNumber: number; data: RSVPData }> = []
 
   for (const rsvp of rsvps) {
+    // A token is shared by the whole party, so rows are keyed by token + name.
     const rowIndex = rows.findIndex(
-      (row, i) => i > 0 && row[R.guest_token] === rsvp.guest_token
+      (row, i) =>
+        i > 0 &&
+        row[R.guest_token] === rsvp.guest_token &&
+        row[R.name] === rsvp.name
     )
     if (rowIndex === -1) {
       toAppend.push(rsvp)
@@ -380,29 +389,28 @@ export async function submitSurveyResponse(entry: {
 }
 
 /**
- * Fetches RSVPs for multiple tokens in a single Sheets read.
- * Returns an array in the same order as the input tokens.
+ * Fetches the RSVPs for a party (one shared token, members keyed by name)
+ * in a single Sheets read. Returns an array in the same order as `names`.
  * Cached per party (args are part of the cache key) with a 60s TTL —
  * tag: 'rsvps', invalidated by submitPartyRSVPs.
  */
 export const getPartyRSVPs = unstable_cache(
-  async (tokens: string[]): Promise<(RSVPData | null)[]> => {
-    if (tokens.length === 0) return []
+  async (token: string, names: string[]): Promise<(RSVPData | null)[]> => {
+    if (!token || names.length === 0) return []
 
-  const sheets = getSheetsClient()
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
-    range: RSVPS_RANGE,
-  })
-  const rows = res.data.values ?? []
-  const tokenSet = new Set(tokens)
-  const rsvpMap = new Map<string, RSVPData>()
+    const sheets = getSheetsClient()
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: RSVPS_RANGE,
+    })
+    const rows = res.data.values ?? []
+    // The whole party shares one token, so members are keyed by name.
+    const rsvpMap = new Map<string, RSVPData>()
 
-  rows.slice(1).forEach((row) => {
-    const t = row[R.guest_token]
-    if (tokenSet.has(t)) {
-      rsvpMap.set(t, {
-        guest_token: t,
+    rows.slice(1).forEach((row) => {
+      if (row[R.guest_token] !== token) return
+      rsvpMap.set(row[R.name] ?? '', {
+        guest_token: token,
         name: row[R.name] ?? '',
         attendance: row[R.attendance] as RSVPData['attendance'],
         dietary: row[R.dietary] ?? '',
@@ -411,10 +419,9 @@ export const getPartyRSVPs = unstable_cache(
         transport_home: row[R.transport_home] ?? '',
         submitted_at: row[R.submitted_at] ?? '',
       })
-    }
-  })
+    })
 
-    return tokens.map((t) => rsvpMap.get(t) ?? null)
+    return names.map((n) => rsvpMap.get(n) ?? null)
   },
   ['party-rsvps'],
   { revalidate: 60, tags: ['rsvps'] }

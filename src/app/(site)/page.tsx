@@ -24,7 +24,7 @@ async function RSVPBlock({ token }: { token: string }) {
   try {
     if (token) {
       party = await getParty(token)
-      existingRsvps = await getPartyRSVPs(party.map((g) => g.token))
+      existingRsvps = await getPartyRSVPs(token, party.map((g) => g.name))
     }
   } catch {
     // Degrade gracefully — the form renders empty and the guest can retry.

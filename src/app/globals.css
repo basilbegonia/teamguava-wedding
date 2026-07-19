@@ -35,6 +35,16 @@ html {
   min-height: calc(100lvh + env(safe-area-inset-bottom, 0px));
 }
 
+/* Hero scroll hint: the hero itself is taller than the visible screen
+   (100lvh + safe area, so the green fills behind browser toolbars), which
+   means anything anchored to its BOTTOM can sit below the visible fold.
+   Anchor the hint to the SMALL viewport height (toolbars expanded) instead,
+   so it's always on screen. */
+.scroll-hint {
+  top: calc(100vh - 8rem);    /* fallback for browsers without svh */
+  top: calc(100svh - 6rem);   /* smallest viewport → guaranteed visible */
+}
+
 /* each section is a direct <div> child of <main> */
 main > div {
   scroll-snap-align: start;

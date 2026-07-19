@@ -69,7 +69,7 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
     setStatus('saving')
 
     const submissions = party.map((guest, i) => ({
-      guest_token:    guest.token,
+      name:           guest.name,
       attendance:     members[i].attendance,
       dietary:        members[i].dietary.join(', '),
       allergies:      members[i].allergies,
@@ -116,7 +116,7 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
             const m = members[i]
             const option = ATTENDANCE_OPTIONS.find((o) => o.value === m.attendance)
             return (
-              <div key={guest.token} className="bg-white rounded-2xl border border-forest/10 p-5 space-y-2">
+              <div key={guest.name} className="bg-white rounded-2xl border border-forest/10 p-5 space-y-2">
                 <p className="font-serif text-lg font-semibold">{guest.name}</p>
                 <p className="font-sans text-sm text-forest/80">{option?.label}</p>
                 {m.dietary.length > 0 && (
@@ -157,7 +157,7 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
               </p>
               <ul className="space-y-0.5">
                 {party.map((g) => (
-                  <li key={g.token} className="font-sans text-sm text-forest/80 flex items-center gap-2">
+                  <li key={g.name} className="font-sans text-sm text-forest/80 flex items-center gap-2">
                     <span className="w-1 h-1 rounded-full bg-forest/40 inline-block flex-shrink-0" />
                     {g.name}
                   </li>
@@ -172,7 +172,7 @@ export default function RSVPForm({ party, existingRsvps }: RSVPFormProps) {
           {/* Member cards */}
           {party.map((guest, i) => (
             <MemberCard
-              key={guest.token}
+              key={guest.name}
               guest={guest}
               index={i}
               total={party.length}
@@ -260,7 +260,7 @@ function MemberCard({ guest, index, total, state, onChange }: MemberCardProps) {
             >
               <input
                 type="radio"
-                name={`attendance-${guest.token}`}
+                name={`attendance-${index}`}
                 value={opt.value}
                 checked={state.attendance === opt.value}
                 onChange={() => onChange({ attendance: opt.value })}
@@ -319,7 +319,7 @@ function MemberCard({ guest, index, total, state, onChange }: MemberCardProps) {
                 <label key={opt} className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="radio"
-                    name={`transport-${guest.token}`}
+                    name={`transport-${index}`}
                     value={opt}
                     checked={state.transport === opt}
                     onChange={() => onChange({ transport: opt })}

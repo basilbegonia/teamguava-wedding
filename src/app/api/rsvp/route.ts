@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 import { getParty, submitPartyRSVPs, RSVPData } from '@/lib/sheets'
 
+// One invite link (token) covers the whole party, so members are identified
+// by name; the party token always comes from the session, never the client.
 interface SubmissionEntry {
-  guest_token: string
+  name: string
   attendance: RSVPData['attendance']
   dietary: string
   allergies: string
@@ -34,7 +36,7 @@ export async function POST(req: NextRequest) {
   if (party.length === 0) {
     return NextResponse.json({ error: 'Guest not found' }, { status: 404 })
   }
-  const partyTokenSet = new Set(party.map((g) => g.token))
+  const memberByName = new Map(party.map((g) => [g.name, g]))
 
   // 3. Parse and validate the request body
   let submissions: SubmissionEntry[]
@@ -46,19 +48,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  // 4. Every submitted token must belong to the session's party
-  const unauthorized = submissions.find((s) => !partyTokenSet.has(s.guest_token))
+  // 4. Every submitted name must belong to the session's party
+  const unauthorized = submissions.find((s) => !memberByName.has(s.name))
   if (unauthorized) {
-    return NextResponse.json({ error: 'Forbidden: token not in party' }, { status: 403 })
+    return NextResponse.json({ error: 'Forbidden: guest not in party' }, { status: 403 })
   }
 
-  // 5. Build full RSVPData objects (name comes from the Guests tab)
-  const guestMap = new Map(party.map((g) => [g.token, g]))
+  // 5. Build full RSVPData objects — all rows carry the shared party token
   const now = new Date().toISOString()
 
   const rsvps: RSVPData[] = submissions.map((s) => ({
-    guest_token:    s.guest_token,
-    name:           guestMap.get(s.guest_token)!.name,
+    guest_token:    sessionToken,
+    name:           s.name,
     attendance:     s.attendance,
     dietary:        s.dietary?.trim() ?? '',
     allergies:      s.allergies?.trim() ?? '',

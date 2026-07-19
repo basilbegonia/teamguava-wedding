@@ -93,7 +93,7 @@ export default function HeroSection() {
           Centered via flexbox (not a transform) so it doesn't clash with the
           fade-up animation's transform. */}
       {showHint && (
-        <div className="absolute inset-x-0 bottom-8 flex justify-center animate-fade-up">
+        <div className="scroll-hint absolute inset-x-0 flex justify-center animate-fade-up">
           <button
             type="button"
             onClick={() => document.getElementById('story')?.scrollIntoView({ behavior: 'smooth' })}

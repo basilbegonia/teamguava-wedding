@@ -22,7 +22,8 @@ export async function GET(
     return NextResponse.redirect(`${baseUrl(request)}/invalid-link?reason=error`)
   }
 
-  const guest = guests.find((g) => g.token === token)
+  // Rows with a token but no name are spare/unassigned tokens — not valid yet.
+  const guest = guests.find((g) => g.token === token && g.name)
 
   if (!guest) {
     return NextResponse.redirect(`${baseUrl(request)}/invalid-link`)
