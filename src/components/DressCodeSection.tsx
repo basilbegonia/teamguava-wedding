@@ -15,6 +15,15 @@ const INSPO_SLIDES = INSPO.map((name, i) => ({
   alt: `Dress code inspiration ${i + 1}`,
 }))
 
+// Church attire guidelines — applies to the ceremony only.
+const GUIDELINES: { ok: boolean; text: string }[] = [
+  { ok: false, text: 'No plunging necklines or backlines' },
+  { ok: false, text: 'No mini skirts' },
+  { ok: false, text: 'No flimsy materials for tops/bottoms that are transparent' },
+  { ok: false, text: 'No slits extending beyond the mid-upper leg area' },
+  { ok: true,  text: 'Use shawls to cover up if needed' },
+]
+
 export default function DressCodeSection() {
   return (
     <div id="dress-code" className="bg-cream text-forest py-16 overflow-hidden">
@@ -49,6 +58,29 @@ export default function DressCodeSection() {
             aspectClass="aspect-[4/3]"
             hint="swipe for more looks →"
           />
+        </div>
+
+        {/* Church attire guidelines */}
+        <div className="space-y-3">
+          <p className="font-sans text-base font-medium text-brown text-center leading-snug">
+            Just a reminder that the ceremony is in a church, so please keep it
+            church-appropriate.
+          </p>
+          <div className="rounded-2xl bg-white border border-forest/10 p-5 space-y-2.5">
+            <p className="font-sans text-sm font-bold text-forest">
+              Rules from the church:
+            </p>
+            {GUIDELINES.map((g) => (
+              <div key={g.text} className="flex items-start gap-2.5">
+                <span aria-hidden className="flex-shrink-0 leading-6">
+                  {g.ok ? '✅' : '❌'}
+                </span>
+                <span className="font-sans text-sm text-forest/80 leading-6">
+                  {g.text}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
       </div>
