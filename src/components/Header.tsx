@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-const NAV_LINKS = [
+const NAV_LINKS: { id: string; label: string; href?: string }[] = [
   { id: 'home',       label: 'dis is it, pancit!' },
   { id: 'story',      label: 'Home' },
   { id: 'schedule',   label: 'Mga Ganap' },
@@ -10,9 +10,14 @@ const NAV_LINKS = [
   { id: 'survey',     label: 'Survey' },
   { id: 'dress-code', label: 'Dress Code' },
   { id: 'our-story',  label: 'Our Story' },
+  // Soft-launched — the /connections page is live by URL but held out of the
+  // menu until ready. To surface it, add:
+  //   { id: 'connections', label: 'Connections', href: '/connections' },
 ]
 
-const SECTION_IDS = NAV_LINKS.map((l) => l.id)
+// Only the in-page scroll sections take part in scroll-spy (href links are
+// separate routes).
+const SECTION_IDS = NAV_LINKS.filter((l) => !l.href).map((l) => l.id)
 
 export default function Header() {
   const [activeSection, setActiveSection] = useState('home')
@@ -87,19 +92,30 @@ export default function Header() {
         }`}
       >
         <div className="flex flex-col py-2">
-          {NAV_LINKS.map((link) => (
-            <button
-              key={link.id}
-              onClick={() => go(link.id)}
-              className={`px-5 py-2.5 text-left font-sans text-sm transition-colors ${
-                activeSection === link.id
-                  ? 'font-medium text-terracotta'
-                  : 'text-forest/80 hover:bg-forest/5'
-              }`}
-            >
-              {link.label}
-            </button>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.href ? (
+              <a
+                key={link.id}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="px-5 py-2.5 text-left font-sans text-sm text-forest/80 transition-colors hover:bg-forest/5"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <button
+                key={link.id}
+                onClick={() => go(link.id)}
+                className={`px-5 py-2.5 text-left font-sans text-sm transition-colors ${
+                  activeSection === link.id
+                    ? 'font-medium text-terracotta'
+                    : 'text-forest/80 hover:bg-forest/5'
+                }`}
+              >
+                {link.label}
+              </button>
+            )
+          )}
         </div>
       </nav>
     </div>

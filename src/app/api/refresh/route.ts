@@ -13,9 +13,10 @@ export async function GET() {
   revalidateTag('guests')
   revalidateTag('rsvps')
   revalidateTag('response-highlights')
+  revalidateTag('connections')
   return NextResponse.json({
     ok: true,
-    refreshed: ['guests', 'rsvps', 'response-highlights'],
+    refreshed: ['guests', 'rsvps', 'response-highlights', 'connections'],
     at: new Date().toISOString(),
   })
 }

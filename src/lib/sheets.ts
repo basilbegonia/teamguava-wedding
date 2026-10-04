@@ -78,6 +78,68 @@ export const getGuests = unstable_cache(
   { revalidate: 300, tags: ['guests'] }
 )
 
+// ─── Connections (guest relationship web) ───────────────────────────────────
+const CONNECTIONS_RANGE = 'Connections!A:F'
+// A=person_a, B=person_b, C=label, D=detail, E=side, F=image_url
+const C = { person_a: 0, person_b: 1, label: 2, detail: 3, side: 4, image_url: 5 }
+
+export interface Connection {
+  person_a: string
+  person_b: string
+  label: string
+  detail: string
+  /** '', 'bea', 'basil', or 'both' — tints the edge by whose side it's on. */
+  side: string
+  image_url: string
+}
+
+// Resolve a sheet image_url to something renderable:
+// - Google Drive share link → direct-view URL
+// - absolute http(s) URL → as-is
+// - root-absolute path (/…) → as-is
+// - bare filename / relative → defaults to the /assets/connections folder
+function resolveImageUrl(url: string): string {
+  if (!url) return ''
+  const drive =
+    url.match(/drive\.google\.com\/file\/d\/([^/]+)/) ||
+    url.match(/[?&]id=([^&]+)/)
+  if (drive) return `https://drive.google.com/uc?export=view&id=${drive[1]}`
+  if (/^https?:\/\//i.test(url)) return url
+  if (url.startsWith('/')) return url
+  return encodeURI(`/assets/connections/${url.replace(/^\.?\/+/, '')}`)
+}
+
+// Reads the Connections tab (the guest relationship web). Cached 5 min —
+// tag: 'connections'. Returns [] if the tab doesn't exist yet, so the page
+// degrades to an empty state until the couple create and fill it.
+export const getConnections = unstable_cache(
+  async (): Promise<Connection[]> => {
+    try {
+      const sheets = getSheetsClient()
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: CONNECTIONS_RANGE,
+      })
+      const rows = res.data.values ?? []
+      return rows
+        .slice(1)
+        .map((row) => ({
+          person_a: (row[C.person_a] ?? '').trim(),
+          person_b: (row[C.person_b] ?? '').trim(),
+          label: (row[C.label] ?? '').trim(),
+          detail: (row[C.detail] ?? '').trim(),
+          side: (row[C.side] ?? '').trim().toLowerCase(),
+          image_url: resolveImageUrl((row[C.image_url] ?? '').trim()),
+        }))
+        .filter((c) => c.person_a && c.person_b)
+    } catch {
+      return []
+    }
+  },
+  ['connections'],
+  { revalidate: 300, tags: ['connections'] }
+)
+
 /**
  * Returns all members of the party the token belongs to.
  * One token is shared by every member row of a party; party_id still groups
