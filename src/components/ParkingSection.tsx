@@ -82,6 +82,8 @@ export default function ParkingSection() {
                   rows={[
                     { icon: '❌', text: 'No parking at The Mess Hall' },
                     { icon: '✅', text: 'Asked for parking in your RSVP? We saved you a free spot at MJ Plaza, the building with the Alorica logo' },
+                    { icon: '🚶', text: 'MJ Plaza is a 3-minute walk from The Mess Hall' },
+                    { icon: '🕒', text: 'Parking at MJ Plaza is open from 3 PM to 12 MN' },
                     { icon: '💬', text: 'At MJ Plaza, mention the Begonia-Luna wedding and give your name' },
                   ]}
                   links={[
