@@ -65,7 +65,7 @@ export default function ParkingSection() {
             }`}
           >
             <div className="overflow-hidden">
-              <div className="px-5 pb-5 pt-1 space-y-5 border-t border-forest/10">
+              <div className="px-5 pb-5 pt-4 space-y-5 border-t border-forest/10">
                 <VenueBlock
                   title="St. John Bosco Parish"
                   rows={[
