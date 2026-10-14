@@ -6,6 +6,7 @@ import HeroSection from '@/components/HeroSection'
 import StorySection from '@/components/StorySection'
 import OurStorySection from '@/components/OurStorySection'
 import ScheduleSection from '@/components/ScheduleSection'
+import ParkingSection from '@/components/ParkingSection'
 import RSVPForm from '@/components/RSVPForm'
 import SurveySection from '@/components/SurveySection'
 import DressCodeSection from '@/components/DressCodeSection'
@@ -75,6 +76,7 @@ export default async function SpaPage() {
       <HeroSection />
       <StorySection />
       <ScheduleSection />
+      <ParkingSection />
       <Suspense fallback={<RSVPFallback />}>
         <RSVPBlock token={guestToken} />
       </Suspense>

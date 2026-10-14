@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Carousel from './Carousel'
+import InfoCard from './InfoCard'
 
 const INSPO = [
   'Feminine - 1.webp',
@@ -66,21 +67,10 @@ export default function DressCodeSection() {
             Just a reminder that the ceremony is in a church, so please keep it
             church-appropriate.
           </p>
-          <div className="rounded-2xl bg-white border border-forest/10 p-5 space-y-2.5">
-            <p className="font-sans text-sm font-bold text-forest">
-              Rules from the church:
-            </p>
-            {GUIDELINES.map((g) => (
-              <div key={g.text} className="flex items-start gap-2.5">
-                <span aria-hidden className="flex-shrink-0 leading-6">
-                  {g.ok ? '✅' : '❌'}
-                </span>
-                <span className="font-sans text-sm text-forest/80 leading-6">
-                  {g.text}
-                </span>
-              </div>
-            ))}
-          </div>
+          <InfoCard
+            title="Rules from the church:"
+            rows={GUIDELINES.map((g) => ({ icon: g.ok ? '✅' : '❌', text: g.text }))}
+          />
         </div>
 
       </div>
