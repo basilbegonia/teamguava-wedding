@@ -239,7 +239,7 @@ export default function SurveySection({ rsvped }: { rsvped: boolean }) {
           Tara
         </button>
         <p className="font-sans text-base font-medium text-brown leading-snug max-w-xs">
-          No rush - you can come back any time (until October 17, 2026) with the same invite link. 🙂
+          You can come back any time until October 20, 2026 with the same invite link. 🙂
         </p>
       </div>
     )

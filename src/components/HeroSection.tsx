@@ -96,7 +96,12 @@ export default function HeroSection() {
         <div className="scroll-hint absolute inset-x-0 flex justify-center animate-fade-up">
           <button
             type="button"
-            onClick={() => document.getElementById('story')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              // Scroll to whatever section follows the hero (the survey for
+              // guests who've RSVP'd, otherwise the story) rather than a fixed id.
+              const hero = document.getElementById('home')
+              window.scrollTo({ top: hero ? hero.offsetHeight : window.innerHeight, behavior: 'smooth' })
+            }}
             aria-label="Scroll down"
             className="flex flex-col items-center gap-1 text-cream/70 transition-colors hover:text-cream"
           >
