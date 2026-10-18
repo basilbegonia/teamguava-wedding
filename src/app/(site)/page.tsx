@@ -15,8 +15,8 @@ import DesktopQRGate from '@/components/DesktopQRGate'
 export const dynamic = 'force-dynamic'
 
 /**
- * The only part of the page that needs Google Sheets. It streams in after the
- * static shell, so first paint never waits on the Sheets API.
+ * The RSVP form — needs Google Sheets, so it streams in after the static
+ * shell and first paint never waits on the Sheets API.
  */
 async function RSVPBlock({ token }: { token: string }) {
   let party: Guest[] = []
@@ -31,12 +31,29 @@ async function RSVPBlock({ token }: { token: string }) {
     // Degrade gracefully — the form renders empty and the guest can retry.
   }
 
-  return (
-    <>
-      <RSVPForm party={party} existingRsvps={existingRsvps} />
-      <SurveySection rsvped={existingRsvps.some((r) => r !== null)} />
-    </>
-  )
+  return <RSVPForm party={party} existingRsvps={existingRsvps} />
+}
+
+/**
+ * The post-RSVP survey, surfaced right after the hero to drive responses.
+ * Hidden until the guest has an RSVP on record (or submits one this session),
+ * so a null fallback is correct — nothing shows while the data streams in.
+ * The Sheets reads are cached, so this does not re-hit the API alongside
+ * RSVPBlock.
+ */
+async function SurveyBlock({ token }: { token: string }) {
+  let rsvped = false
+  try {
+    if (token) {
+      const party = await getParty(token)
+      const existingRsvps = await getPartyRSVPs(token, party.map((g) => g.name))
+      rsvped = existingRsvps.some((r) => r !== null)
+    }
+  } catch {
+    // Degrade gracefully — survey simply stays hidden.
+  }
+
+  return <SurveySection rsvped={rsvped} />
 }
 
 function RSVPFallback() {
@@ -74,6 +91,9 @@ export default async function SpaPage() {
     <>
       <DesktopQRGate token={guestToken} />
       <HeroSection />
+      <Suspense fallback={null}>
+        <SurveyBlock token={guestToken} />
+      </Suspense>
       <StorySection />
       <ScheduleSection />
       <ParkingSection />
