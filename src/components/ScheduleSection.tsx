@@ -27,7 +27,7 @@ export default function ScheduleSection() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/assets/mga-ganap/mga-ganap-2.webp"
-        alt="6:00 PM reception at The Mess Hall, Makati — Karrivin Plaza, Chino Roces Ave."
+        alt="6:00 PM reception at The Mess Hall, Makati — Karrivin Plaza, Chino Roces Ave. Program: 6 PM cocktail hour, 7 PM dinner and program, 10 PM Chillnuman til midnight."
         className="w-full h-auto mt-10"
         loading="lazy"
         decoding="async"
